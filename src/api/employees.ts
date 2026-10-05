@@ -6,7 +6,7 @@ export async function listEmployees(): Promise<Employee[]> {
   return data;
 }
 
-export async function getEmployee(id: number | string): Promise<Employee> {
+export async function getEmployee(id: string): Promise<Employee> {
   const { data } = await apiClient.get<Employee>(`/employees/${id}`);
   return data;
 }

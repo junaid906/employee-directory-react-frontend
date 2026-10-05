@@ -61,6 +61,10 @@ export default function EmployeeListPage() {
     return <p className="text-neutral-500">No employees found.</p>;
   }
 
+  const byUniqueId = new Map(
+    employees.map((e) => [e.uniqueId, e]),
+  );
+
   return (
     <div className="overflow-x-auto rounded border border-neutral-300 bg-white">
       <table className="w-full text-left text-sm">
@@ -76,43 +80,59 @@ export default function EmployeeListPage() {
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-200">
-          {employees.map((e) => (
-            <tr key={e.id} className="hover:bg-neutral-50">
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-3">
-                  {e.avatarUrl ? (
-                    <img
-                      src={e.avatarUrl}
-                      alt={`${e.firstName} ${e.lastName}`}
-                      className="h-8 w-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span
-                      aria-hidden
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-200 text-xs font-medium text-neutral-600"
+          {employees.map((e) => {
+            const manager = e.reportingToUniqueId
+              ? byUniqueId.get(e.reportingToUniqueId)
+              : undefined;
+            return (
+              <tr key={e.uniqueId} className="hover:bg-neutral-50">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    {e.avatarUrl ? (
+                      <img
+                        src={e.avatarUrl}
+                        alt={`${e.firstName} ${e.lastName}`}
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span
+                        aria-hidden
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-200 text-xs font-medium text-neutral-600"
+                      >
+                        {e.firstName.charAt(0)}
+                        {e.lastName.charAt(0)}
+                      </span>
+                    )}
+                    <Link
+                      to={`/employees/${e.uniqueId}`}
+                      className="text-black underline underline-offset-2"
                     >
-                      {e.firstName.charAt(0)}
-                      {e.lastName.charAt(0)}
-                    </span>
+                      {e.firstName} {e.lastName}
+                    </Link>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-neutral-700">{e.email}</td>
+                <td className="px-4 py-3 text-neutral-700">{e.department}</td>
+                <td className="px-4 py-3 text-neutral-700">{e.subDepartment}</td>
+                <td className="px-4 py-3 text-neutral-700">{e.jobTitle}</td>
+                <td className="px-4 py-3 text-neutral-700">
+                  {manager ? (
+                    <Link
+                      to={`/employees/${manager.uniqueId}`}
+                      className="text-black underline underline-offset-2"
+                    >
+                      {manager.firstName} {manager.lastName}
+                    </Link>
+                  ) : (
+                    "—"
                   )}
-                  <Link
-                    to={`/employees/${e.id}`}
-                    className="text-black underline underline-offset-2"
-                  >
-                    {e.firstName} {e.lastName}
-                  </Link>
-                </div>
-              </td>
-              <td className="px-4 py-3 text-neutral-700">{e.email}</td>
-              <td className="px-4 py-3 text-neutral-700">{e.department}</td>
-              <td className="px-4 py-3 text-neutral-700">{e.subDepartment}</td>
-              <td className="px-4 py-3 text-neutral-700">{e.jobTitle}</td>
-              <td className="px-4 py-3 text-neutral-700">{e.reportingTo ?? "—"}</td>
-              <td className="px-4 py-3 text-neutral-700">
-                {e.seatingPosition ?? "—"}
-              </td>
-            </tr>
-          ))}
+                </td>
+                <td className="px-4 py-3 text-neutral-700">
+                  {e.seatingPosition ?? "—"}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router";
 import { getEmployee } from "../api/employees";
 import type { Employee } from "../types/employee";
@@ -6,6 +6,7 @@ import type { Employee } from "../types/employee";
 export default function EmployeeDetailPage() {
   const { id } = useParams();
   const [employee, setEmployee] = useState<Employee | null>(null);
+  const [manager, setManager] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,7 +15,17 @@ export default function EmployeeDetailPage() {
     let cancelled = false;
     getEmployee(id)
       .then((data) => {
-        if (!cancelled) setEmployee(data);
+        if (cancelled) return;
+        setEmployee(data);
+        if (data.reportingToUniqueId) {
+          getEmployee(data.reportingToUniqueId)
+            .then((m) => {
+              if (!cancelled) setManager(m);
+            })
+            .catch(() => {
+              if (!cancelled) setManager(null);
+            });
+        }
       })
       .catch(() => {
         if (!cancelled) setError("Could not load employee.");
@@ -45,12 +56,26 @@ export default function EmployeeDetailPage() {
     );
   }
 
-  const fields: Array<[string, string]> = [
+  const reportsTo =
+    manager ? (
+      <Link
+        to={`/employees/${manager.uniqueId}`}
+        className="text-black underline underline-offset-2"
+      >
+        {manager.firstName} {manager.lastName}
+      </Link>
+    ) : employee.reportingToUniqueId ? (
+      employee.reportingToUniqueId
+    ) : (
+      "—"
+    );
+
+  const fields: Array<[string, ReactNode]> = [
     ["Email", employee.email],
     ["Department", employee.department],
     ["Sub-department", employee.subDepartment],
     ["Job title", employee.jobTitle],
-    ["Reports to", employee.reportingTo?.toString() ?? "—"],
+    ["Reports to", reportsTo],
     ["Seating position", employee.seatingPosition?.toString() ?? "—"],
   ];
 
