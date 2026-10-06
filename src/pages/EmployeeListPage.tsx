@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { listEmployees } from "../api/employees";
 import type { Employee } from "../types/employee";
+import Avatar from "../components/Avatar";
+import ErrorState from "../components/ErrorState";
+import LoadingState from "../components/LoadingState";
+import PageCard from "../components/PageCard";
+
+const LOAD_ERROR = "Could not load employees. Is the API running on http://localhost:5102?";
 
 export default function EmployeeListPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -14,7 +20,7 @@ export default function EmployeeListPage() {
     try {
       setEmployees(await listEmployees());
     } catch {
-      setError("Could not load employees. Is the API running on http://localhost:5102?");
+      setError(LOAD_ERROR);
     } finally {
       setLoading(false);
     }
@@ -27,8 +33,7 @@ export default function EmployeeListPage() {
         if (!cancelled) setEmployees(data);
       })
       .catch(() => {
-        if (!cancelled)
-          setError("Could not load employees. Is the API running on http://localhost:5102?");
+        if (!cancelled) setError(LOAD_ERROR);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -39,26 +44,11 @@ export default function EmployeeListPage() {
   }, []);
 
   if (loading) {
-    return <p className="text-neutral-500">Loading employees…</p>;
+    return <LoadingState message="Loading employees…" />;
   }
 
   if (error) {
-    return (
-      <div className="rounded border border-neutral-300 bg-white p-4">
-        <p className="text-black">{error}</p>
-        <button
-          type="button"
-          onClick={() => void load()}
-          className="mt-3 rounded bg-black px-4 py-2 text-white"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
-
-  if (employees.length === 0) {
-    return <p className="text-neutral-500">No employees found.</p>;
+    return <ErrorState message={error} onRetry={load} />;
   }
 
   const byUniqueId = new Map(
@@ -66,75 +56,84 @@ export default function EmployeeListPage() {
   );
 
   return (
-    <div className="overflow-x-auto rounded border border-neutral-300 bg-white">
-      <table className="w-full text-left text-sm">
-        <thead className="border-b border-neutral-300 bg-neutral-100 text-black">
-          <tr>
-            <th className="px-4 py-3 font-medium">Employee</th>
-            <th className="px-4 py-3 font-medium">Email</th>
-            <th className="px-4 py-3 font-medium">Department</th>
-            <th className="px-4 py-3 font-medium">Sub-department</th>
-            <th className="px-4 py-3 font-medium">Job title</th>
-            <th className="px-4 py-3 font-medium">Reports to</th>
-            <th className="px-4 py-3 font-medium">Seat</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-neutral-200">
-          {employees.map((e) => {
-            const manager = e.reportingToUniqueId
-              ? byUniqueId.get(e.reportingToUniqueId)
-              : undefined;
-            return (
-              <tr key={e.uniqueId} className="hover:bg-neutral-50">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    {e.avatarUrl ? (
-                      <img
-                        src={e.avatarUrl}
-                        alt={`${e.firstName} ${e.lastName}`}
-                        className="h-8 w-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <span
-                        aria-hidden
-                        className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-200 text-xs font-medium text-neutral-600"
-                      >
-                        {e.firstName.charAt(0)}
-                        {e.lastName.charAt(0)}
-                      </span>
-                    )}
-                    <Link
-                      to={`/employees/${e.uniqueId}`}
-                      className="text-black underline underline-offset-2"
-                    >
-                      {e.firstName} {e.lastName}
-                    </Link>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-neutral-700">{e.email}</td>
-                <td className="px-4 py-3 text-neutral-700">{e.department}</td>
-                <td className="px-4 py-3 text-neutral-700">{e.subDepartment}</td>
-                <td className="px-4 py-3 text-neutral-700">{e.jobTitle}</td>
-                <td className="px-4 py-3 text-neutral-700">
-                  {manager ? (
-                    <Link
-                      to={`/employees/${manager.uniqueId}`}
-                      className="text-black underline underline-offset-2"
-                    >
-                      {manager.firstName} {manager.lastName}
-                    </Link>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td className="px-4 py-3 text-neutral-700">
-                  {e.seatingPosition ?? "—"}
-                </td>
+    <PageCard
+      title="Employees"
+      subtitle={`${employees.length} team member${employees.length !== 1 ? "s" : ""}`}
+      action={
+        <Link
+          to="/employees/new"
+          className="rounded bg-black px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+        >
+          Add Employee
+        </Link>
+      }
+    >
+      {employees.length === 0 ? (
+        <div className="px-6 py-12 text-center">
+          <p className="text-neutral-500">No employees found.</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-neutral-200 bg-neutral-50">
+              <tr>
+                <th className="px-6 py-3 font-medium text-neutral-600">Employee</th>
+                <th className="px-6 py-3 font-medium text-neutral-600">Email</th>
+                <th className="px-6 py-3 font-medium text-neutral-600">Department</th>
+                <th className="px-6 py-3 font-medium text-neutral-600">Sub-department</th>
+                <th className="px-6 py-3 font-medium text-neutral-600">Job title</th>
+                <th className="px-6 py-3 font-medium text-neutral-600">Reports to</th>
+                <th className="px-6 py-3 font-medium text-neutral-600">Seat</th>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
+              {employees.map((e) => {
+                const manager = e.reportingToUniqueId
+                  ? byUniqueId.get(e.reportingToUniqueId)
+                  : undefined;
+                return (
+                  <tr key={e.uniqueId} className="hover:bg-neutral-50">
+                    <td className="px-6 py-4">
+                      <Link
+                        to={`/employees/${e.uniqueId}`}
+                        className="flex items-center gap-3 hover:bg-neutral-100"
+                      >
+                        <Avatar
+                          src={e.avatarUrl}
+                          firstName={e.firstName}
+                          lastName={e.lastName}
+                        />
+                        <span className="font-medium text-black">
+                          {e.firstName} {e.lastName}
+                        </span>
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 text-neutral-600">{e.email}</td>
+                    <td className="px-6 py-4 text-neutral-600">{e.department}</td>
+                    <td className="px-6 py-4 text-neutral-600">{e.subDepartment}</td>
+                    <td className="px-6 py-4 text-neutral-600">{e.jobTitle}</td>
+                    <td className="px-6 py-4 text-neutral-600">
+                      {manager ? (
+                        <Link
+                          to={`/employees/${manager.uniqueId}`}
+                          className="font-medium text-black hover:underline"
+                        >
+                          {manager.firstName} {manager.lastName}
+                        </Link>
+                      ) : (
+                        <span className="text-neutral-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-neutral-600">
+                      {e.seatingPosition ?? <span className="text-neutral-400">—</span>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </PageCard>
   );
 }
