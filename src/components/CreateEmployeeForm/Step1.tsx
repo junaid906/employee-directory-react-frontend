@@ -1,4 +1,5 @@
 import type { CreateEmployeeDto } from "../../api/employees";
+import { COMPANY_EMAIL_DOMAIN } from "../../lib/constants";
 
 interface Step1Props {
   formData: CreateEmployeeDto;
@@ -46,11 +47,26 @@ export default function Step1({ formData, onChange }: Step1Props) {
           value={formData.email}
           onChange={(e) => onChange("email", e.target.value)}
           required
-          pattern=".+@wbwr\.io"
-          title="Email must be from the @wbwr.io domain"
+          pattern={`.+@${COMPANY_EMAIL_DOMAIN.replace(".", "\\.")}`}
+          title={`Email must be from the @${COMPANY_EMAIL_DOMAIN} domain`}
           className="mt-1 block w-full rounded border border-neutral-300 px-3 py-2 text-black placeholder:text-neutral-400 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
         />
-        <p className="mt-1 text-xs text-neutral-500">Must be from the @wbwr.io domain</p>
+        <p className="mt-1 text-xs text-neutral-500">Must be from the @{COMPANY_EMAIL_DOMAIN} domain</p>
+      </div>
+
+      <div>
+        <label htmlFor="role" className="block text-sm font-medium text-black">
+          Role
+        </label>
+        <input
+          type="text"
+          id="role"
+          value="User"
+          readOnly
+          disabled
+          className="mt-1 block w-full rounded border border-neutral-300 bg-neutral-100 px-3 py-2 text-neutral-500"
+        />
+        <p className="mt-1 text-xs text-neutral-500">Assigned automatically</p>
       </div>
     </div>
   );

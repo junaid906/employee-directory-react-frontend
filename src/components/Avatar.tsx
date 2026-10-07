@@ -1,7 +1,10 @@
+import { FiUser } from "react-icons/fi";
+
 interface AvatarProps {
   src?: string | null;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
+  placeholder?: boolean;
   size?: "sm" | "md" | "lg";
   className?: string;
 }
@@ -12,14 +15,30 @@ const sizeClasses = {
   lg: "h-20 w-20 text-xl",
 };
 
+const iconSizeClasses = {
+  sm: "h-4 w-4",
+  md: "h-8 w-8",
+  lg: "h-10 w-10",
+};
+
 export default function Avatar({
   src,
-  firstName,
-  lastName,
+  firstName = "",
+  lastName = "",
+  placeholder = false,
   size = "sm",
   className = "",
 }: AvatarProps) {
-  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
+  if (placeholder) {
+    return (
+      <span
+        aria-hidden
+        className={`flex shrink-0 items-center justify-center rounded-full bg-neutral-200 text-neutral-400 ${sizeClasses[size]} ${className}`}
+      >
+        <FiUser className={iconSizeClasses[size]} />
+      </span>
+    );
+  }
 
   if (src) {
     return (
@@ -30,6 +49,8 @@ export default function Avatar({
       />
     );
   }
+
+  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
 
   return (
     <span

@@ -1,39 +1,20 @@
-import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { getEmployee } from "../api/employees";
-import type { Employee } from "../types/employee";
 import Avatar from "../components/Avatar";
 import ErrorState from "../components/ErrorState";
 import LoadingState from "../components/LoadingState";
 import PageCard from "../components/PageCard";
+import { useAsyncData } from "../hooks/useAsyncData";
+import { EMPLOYEE_LOAD_ERROR } from "../lib/messages";
 
 export default function EmployeeDetailPage() {
   const { id } = useParams();
-  const [employee, setEmployee] = useState<Employee | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!id) return;
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const data = await getEmployee(id!);
-        if (cancelled) return;
-        setEmployee(data);
-      } catch {
-        if (cancelled) setError("Could not load employee.");
-      } finally {
-        if (cancelled) setLoading(false);
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
+  const {
+    data: employee,
+    loading,
+    error,
+  } = useAsyncData(id ?? "", () => getEmployee(id!), EMPLOYEE_LOAD_ERROR);
 
   if (loading) {
     return <LoadingState message="Loading employee…" />;
@@ -45,7 +26,10 @@ export default function EmployeeDetailPage() {
 
   const fields: Array<[string, string]> = [
     ["Email", employee.email],
-    ["Seating position", employee.seatingPosition?.toString() ?? "—"],
+    ["Position", employee.position.jobTitle],
+    ["Department", employee.department.departmentName],
+    ["Sub Department", employee.subDepartment?.subDepartmentName ?? "—"],
+    ["Seating position", employee.position.seatingPosition.toString()],
   ];
 
   return (
@@ -54,7 +38,7 @@ export default function EmployeeDetailPage() {
       subtitle="Employee"
       action={
         <Link
-          to={`/org-chart?selected=${employee.uniqueId}`}
+          to={`/org-chart?selected=${employee.position.uniqueId}`}
           className="rounded border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-black hover:bg-neutral-50"
         >
           View in Org Chart

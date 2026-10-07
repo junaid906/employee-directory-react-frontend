@@ -1,54 +1,78 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { listEmployees } from "../api/employees";
+import {
+  deactivateEmployee,
+  getPositions,
+  listEmployees,
+} from "../api/employees";
 import type { Employee } from "../types/employee";
-import Avatar from "../components/Avatar";
+import ConfirmDialog from "../components/ConfirmDialog";
+import EmptyState from "../components/EmptyState";
+import EmployeeTable from "../components/EmployeeTable";
 import ErrorState from "../components/ErrorState";
 import LoadingState from "../components/LoadingState";
 import PageCard from "../components/PageCard";
-
-const LOAD_ERROR = "Could not load employees. Is the API running?";
+import { useAsyncData } from "../hooks/useAsyncData";
+import {
+  DEACTIVATE_EMPLOYEE_ERROR,
+  EMPLOYEES_LOAD_ERROR,
+} from "../lib/messages";
 
 export default function EmployeeListPage() {
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error, reload } = useAsyncData(
+    "employees",
+    () =>
+      Promise.all([listEmployees(), getPositions()]).then(
+        ([employees, positions]) => ({ employees, positions }),
+      ),
+    EMPLOYEES_LOAD_ERROR,
+  );
 
-  const load = async () => {
-    setLoading(true);
-    setError(null);
+  const employees = useMemo(() => data?.employees ?? [], [data]);
+  const positions = useMemo(() => data?.positions ?? [], [data]);
+  const positionMap = useMemo(
+    () => Object.fromEntries(positions.map((p) => [p.uniqueId, p])),
+    [positions],
+  );
+
+  const [deactivateTarget, setDeactivateTarget] = useState<Employee | null>(
+    null,
+  );
+  const [isDeactivating, setIsDeactivating] = useState(false);
+  const [deactivateError, setDeactivateError] = useState<string | null>(null);
+
+  function requestDeactivate(employee: Employee) {
+    setDeactivateError(null);
+    setDeactivateTarget(employee);
+  }
+
+  function cancelDeactivate() {
+    if (isDeactivating) return;
+    setDeactivateTarget(null);
+    setDeactivateError(null);
+  }
+
+  async function confirmDeactivate() {
+    if (!deactivateTarget) return;
+    setIsDeactivating(true);
+    setDeactivateError(null);
     try {
-      setEmployees(await listEmployees());
+      await deactivateEmployee(deactivateTarget.uniqueId);
+      setDeactivateTarget(null);
+      reload();
     } catch {
-      setError(LOAD_ERROR);
+      setDeactivateError(DEACTIVATE_EMPLOYEE_ERROR);
     } finally {
-      setLoading(false);
+      setIsDeactivating(false);
     }
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-    listEmployees()
-      .then((data) => {
-        if (!cancelled) setEmployees(data);
-      })
-      .catch(() => {
-        if (!cancelled) setError(LOAD_ERROR);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  }
 
   if (loading) {
     return <LoadingState message="Loading employees…" />;
   }
 
   if (error) {
-    return <ErrorState message={error} onRetry={load} />;
+    return <ErrorState message={error} onRetry={reload} />;
   }
 
   return (
@@ -57,7 +81,7 @@ export default function EmployeeListPage() {
       subtitle={`${employees.length} team member${employees.length !== 1 ? "s" : ""}`}
       action={
         <Link
-          to="/employees/new"
+          to="/employees/create"
           className="rounded bg-black px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
         >
           Add Employee
@@ -65,47 +89,30 @@ export default function EmployeeListPage() {
       }
     >
       {employees.length === 0 ? (
-        <div className="px-6 py-12 text-center">
-          <p className="text-neutral-500">No employees found.</p>
-        </div>
+        <EmptyState message="No employees found." />
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 bg-neutral-50">
-              <tr>
-                <th className="px-6 py-3 font-medium text-neutral-600">Employee</th>
-                <th className="px-6 py-3 font-medium text-neutral-600">Email</th>
-                <th className="px-6 py-3 font-medium text-neutral-600">Seat</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100">
-              {employees.map((e) => (
-                <tr key={e.uniqueId} className="hover:bg-neutral-50">
-                  <td className="px-6 py-4">
-                    <Link
-                      to={`/employees/${e.uniqueId}`}
-                      className="flex items-center gap-3 hover:bg-neutral-100"
-                    >
-                      <Avatar
-                        src={e.avatarUrl}
-                        firstName={e.firstName}
-                        lastName={e.lastName}
-                      />
-                      <span className="font-medium text-black">
-                        {e.firstName} {e.lastName}
-                      </span>
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4 text-neutral-600">{e.email}</td>
-                  <td className="px-6 py-4 text-neutral-600">
-                    {e.seatingPosition ?? <span className="text-neutral-400">—</span>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <EmployeeTable
+          employees={employees}
+          positionMap={positionMap}
+          onDeactivate={requestDeactivate}
+        />
       )}
+
+      <ConfirmDialog
+        open={deactivateTarget !== null}
+        title="Deactivate employee"
+        message={
+          deactivateTarget
+            ? `Are you sure you want to deactivate ${deactivateTarget.firstName} ${deactivateTarget.lastName}? This action cannot be undone.`
+            : ""
+        }
+        confirmLabel="Deactivate"
+        confirmingLabel="Deactivating…"
+        isConfirming={isDeactivating}
+        error={deactivateError}
+        onConfirm={confirmDeactivate}
+        onCancel={cancelDeactivate}
+      />
     </PageCard>
   );
 }

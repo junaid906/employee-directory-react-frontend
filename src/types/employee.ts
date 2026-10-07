@@ -3,9 +3,19 @@ export interface Employee {
   firstName: string;
   lastName: string;
   email: string;
-  positionUniqueId: string | null;
-  seatingPosition: number | null;
+  positionUniqueId: string;
   avatarUrl: string | null;
+}
+
+export interface DetailedEmployee {
+  uniqueId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  avatarUrl: string | null;
+  position: Position;
+  department: Department;
+  subDepartment: SubDepartment | null;
 }
 
 export interface Position {
@@ -14,5 +24,16 @@ export interface Position {
   departmentUniqueId: string;
   subDepartmentUniqueId: string | null;
   reportToPositionUniqueId: string | null;
-  seatingPosition: number | null;
+  seatingPosition: number;
+}
+
+export interface Department {
+  uniqueId: string;
+  departmentName: string;
+}
+
+export interface SubDepartment {
+  uniqueId: string;
+  subDepartmentName: string;
+  departmentUniqueId: string;
 }

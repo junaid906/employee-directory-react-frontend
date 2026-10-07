@@ -2,8 +2,13 @@ import dagre from "@dagrejs/dagre";
 import type { Edge, Node } from "@xyflow/react";
 import type { Employee, Position } from "../types/employee";
 
-export const NODE_WIDTH = 260;
-export const NODE_HEIGHT = 100;
+export const NODE_WIDTH = 180;
+export const NODE_HEIGHT = 180;
+export const CLUSTER_CARD_WIDTH = 180;
+export const CLUSTER_CARD_GAP = 4;
+export const CLUSTER_PADDING = 12;
+export const CLUSTER_BORDER = 2;
+export const CLUSTER_HEADER_HEIGHT = 56;
 
 export type EmployeeNodeData = {
   employee: Employee;
@@ -16,76 +21,139 @@ export type EmployeeNodeData = {
   [key: string]: unknown;
 };
 
+export type ManagerClusterNodeData = {
+  position: Position;
+  employees: Employee[];
+  hasChildren?: boolean;
+  isExpanded?: boolean;
+  isSelected?: boolean;
+  onToggle?: () => void;
+  onSelect?: () => void;
+  [key: string]: unknown;
+};
+
+export type VacantNodeData = {
+  position: Position;
+  hasChildren?: boolean;
+  isExpanded?: boolean;
+  isSelected?: boolean;
+  onToggle?: () => void;
+  onSelect?: () => void;
+  [key: string]: unknown;
+};
+
 export type ChildrenMap = Map<string, string[]>;
 export type NodeId = string;
+
+export type OrgChartNode = Node<
+  EmployeeNodeData | ManagerClusterNodeData | VacantNodeData
+>;
+
+export function getClusterWidth(employeeCount: number): number {
+  const count = Math.max(employeeCount, 1);
+  const content =
+    count * CLUSTER_CARD_WIDTH + (count - 1) * CLUSTER_CARD_GAP;
+  return content + (CLUSTER_PADDING + CLUSTER_BORDER) * 2;
+}
+
+function getNodeWidth(node: OrgChartNode): number {
+  if (node.type === "managerCluster") {
+    return getClusterWidth(
+      (node.data as ManagerClusterNodeData).employees.length,
+    );
+  }
+  return NODE_WIDTH;
+}
+
+function getNodeHeight(node: OrgChartNode): number {
+  if (node.type === "managerCluster") {
+    return NODE_HEIGHT + CLUSTER_HEADER_HEIGHT;
+  }
+  return NODE_HEIGHT;
+}
 
 export function buildGraph(
   employees: Employee[],
   positions: Position[],
 ): {
-  nodes: Node<EmployeeNodeData>[];
+  nodes: OrgChartNode[];
   edges: Edge[];
 } {
   const positionById = new Map(positions.map((p) => [p.uniqueId, p]));
 
-  const nodes: Node<EmployeeNodeData>[] = employees.map((employee) => {
-    const position = employee.positionUniqueId
-      ? positionById.get(employee.positionUniqueId)
-      : undefined;
+  const employeesByPositionId = new Map<string, Employee[]>();
+  for (const employee of employees) {
+    const existing = employeesByPositionId.get(employee.positionUniqueId) ?? [];
+    existing.push(employee);
+    employeesByPositionId.set(employee.positionUniqueId, existing);
+  }
+
+  const nodes: OrgChartNode[] = positions.map((position) => {
+    const positionEmployees =
+      employeesByPositionId.get(position.uniqueId) ?? [];
+
+    if (positionEmployees.length === 0) {
+      return {
+        id: position.uniqueId,
+        type: "vacant",
+        position: { x: 0, y: 0 },
+        data: {
+          position,
+        } as VacantNodeData,
+      };
+    }
+
+    if (positionEmployees.length === 1) {
+      return {
+        id: position.uniqueId,
+        type: "employee",
+        position: { x: 0, y: 0 },
+        data: {
+          employee: positionEmployees[0],
+          jobTitle: position.jobTitle,
+        } as EmployeeNodeData,
+      };
+    }
+
     return {
-      id: employee.uniqueId,
-      type: "employee",
+      id: position.uniqueId,
+      type: "managerCluster",
       position: { x: 0, y: 0 },
       data: {
-        employee,
-        jobTitle: position?.jobTitle,
-      },
+        position,
+        employees: positionEmployees,
+      } as ManagerClusterNodeData,
     };
   });
 
-  const employeesByPositionId = new Map<string, Employee[]>();
-
-  for (const employee of employees) {
-    if (employee.positionUniqueId) {
-      const existing = employeesByPositionId.get(employee.positionUniqueId) ?? [];
-      existing.push(employee);
-      employeesByPositionId.set(employee.positionUniqueId, existing);
-    }
-  }
-
   const edges: Edge[] = [];
+  for (const position of positions) {
+    if (!position.reportToPositionUniqueId) continue;
+    if (!positionById.has(position.reportToPositionUniqueId)) continue;
 
-  for (const employee of employees) {
-    if (!employee.positionUniqueId) continue;
-
-    const position = positionById.get(employee.positionUniqueId);
-    if (!position || !position.reportToPositionUniqueId) continue;
-
-    const managerEmployees = employeesByPositionId.get(position.reportToPositionUniqueId);
-    if (!managerEmployees) continue;
-
-    for (const managerEmployee of managerEmployees) {
-      edges.push({
-        id: `e-${managerEmployee.uniqueId}-${employee.uniqueId}`,
-        source: managerEmployee.uniqueId,
-        target: employee.uniqueId,
-      });
-    }
+    edges.push({
+      id: `e-${position.reportToPositionUniqueId}-${position.uniqueId}`,
+      source: position.reportToPositionUniqueId,
+      target: position.uniqueId,
+    });
   }
 
   return { nodes, edges };
 }
 
 export function layoutGraph(
-  nodes: Node<EmployeeNodeData>[],
+  nodes: OrgChartNode[],
   edges: Edge[],
-): { nodes: Node<EmployeeNodeData>[]; edges: Edge[] } {
+): { nodes: OrgChartNode[]; edges: Edge[] } {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "TB", nodesep: 135, ranksep: 100 });
+  g.setGraph({ rankdir: "TB", nodesep: 40, ranksep: 300 });
 
   for (const node of nodes) {
-    g.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
+    g.setNode(node.id, {
+      width: getNodeWidth(node),
+      height: getNodeHeight(node),
+    });
   }
   for (const edge of edges) {
     g.setEdge(edge.source, edge.target);
@@ -98,8 +166,8 @@ export function layoutGraph(
     return {
       ...node,
       position: {
-        x: pos.x - NODE_WIDTH / 2,
-        y: pos.y - NODE_HEIGHT / 2,
+        x: pos.x - getNodeWidth(node) / 2,
+        y: pos.y - getNodeHeight(node) / 2,
       },
     };
   });
@@ -164,45 +232,53 @@ export function getHiddenNodeIds(
   return hiddenNodeIds;
 }
 
-export function getRootNodeIds(
-  employees: Employee[],
-  positions: Position[],
-): NodeId[] {
-  const positionById = new Map(positions.map((p) => [p.uniqueId, p]));
-  const rootPositionIds = new Set<string>();
+export function getRootNodeIds(positions: Position[]): NodeId[] {
+  const rootPositionIds: NodeId[] = [];
 
   for (const position of positions) {
     if (!position.reportToPositionUniqueId) {
-      rootPositionIds.add(position.uniqueId);
+      rootPositionIds.push(position.uniqueId);
     }
   }
 
-  const employeeRoots: NodeId[] = [];
-  const seenEmployeeIds = new Set<string>();
+  return rootPositionIds;
+}
 
-  for (const employee of employees) {
-    if (seenEmployeeIds.has(employee.uniqueId)) continue;
-
-    if (!employee.positionUniqueId) {
-      employeeRoots.push(employee.uniqueId);
-      seenEmployeeIds.add(employee.uniqueId);
-      continue;
-    }
-
-    const position = positionById.get(employee.positionUniqueId);
-    if (!position) {
-      employeeRoots.push(employee.uniqueId);
-      seenEmployeeIds.add(employee.uniqueId);
-      continue;
-    }
-
-    if (rootPositionIds.has(position.uniqueId)) {
-      employeeRoots.push(employee.uniqueId);
-      seenEmployeeIds.add(employee.uniqueId);
+export function buildChildToParentMap(
+  childrenMap: ChildrenMap,
+): Map<NodeId, NodeId> {
+  const childToParentMap = new Map<NodeId, NodeId>();
+  for (const [parentId, childIds] of childrenMap) {
+    for (const childId of childIds) {
+      childToParentMap.set(childId, parentId);
     }
   }
+  return childToParentMap;
+}
 
-  return employeeRoots;
+export function getNextCollapsedNodeIds(
+  current: Set<NodeId>,
+  toggledId: NodeId,
+  childToParentMap: Map<NodeId, NodeId>,
+  childrenMap: ChildrenMap,
+): Set<NodeId> {
+  const next = new Set(current);
+
+  if (next.has(toggledId)) {
+    const parentId = childToParentMap.get(toggledId);
+    if (parentId) {
+      for (const siblingId of childrenMap.get(parentId) ?? []) {
+        if (siblingId !== toggledId) {
+          next.add(siblingId);
+        }
+      }
+    }
+    next.delete(toggledId);
+  } else {
+    next.add(toggledId);
+  }
+
+  return next;
 }
 
 export function getNodesToShowAsCollapsed(
@@ -211,27 +287,17 @@ export function getNodesToShowAsCollapsed(
 ): Set<NodeId> {
   const nodesToCollapse: Set<NodeId> = new Set();
 
-  function traverseDownFromRoot(rootId: NodeId, currentDepth: number) {
-    if (currentDepth >= 2) {
-      nodesToCollapse.add(rootId);
-      return;
-    }
-
-    const childIds = childrenMap.get(rootId) ?? [];
-    for (const childId of childIds) {
-      traverseDownFromRoot(childId, currentDepth + 1);
-    }
-  }
-
   for (const rootId of rootNodeIds) {
-    traverseDownFromRoot(rootId, 0);
+    for (const descendantId of getAllDescendantIds(rootId, childrenMap)) {
+      nodesToCollapse.add(descendantId);
+    }
   }
 
   return nodesToCollapse;
 }
 
 export function filterNodesAndEdges(
-  nodes: Node<EmployeeNodeData>[],
+  nodes: OrgChartNode[],
   edges: Edge[],
   hiddenNodeIds: Set<NodeId>,
 ) {
