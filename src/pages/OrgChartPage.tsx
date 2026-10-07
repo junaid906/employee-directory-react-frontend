@@ -8,8 +8,8 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useSearchParams } from "react-router";
-import { listEmployees } from "../api/employees";
-import type { Employee } from "../types/employee";
+import { listEmployees, getPositions } from "../api/employees";
+import type { Employee, Position } from "../types/employee";
 import EmployeeNode from "../components/EmployeeNode";
 import { FloatingHeader } from "../components/Header";
 import LoadingState from "../components/LoadingState";
@@ -33,6 +33,7 @@ const nodeTypes = { employee: EmployeeNode };
 function OrgChart() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [collapsedNodeIds, setCollapsedNodeIds] = useState<Set<NodeId> | null>(
@@ -54,15 +55,16 @@ function OrgChart() {
 
   useEffect(() => {
     let cancelled = false;
-    listEmployees()
-      .then((data) => {
-        if (!cancelled) setEmployees(data);
+    Promise.all([listEmployees(), getPositions()])
+      .then(([employeeData, positionData]) => {
+        if (!cancelled) {
+          setEmployees(employeeData);
+          setPositions(positionData);
+        }
       })
       .catch(() => {
         if (!cancelled) {
-          setError(
-            "Could not load employees. Is the API running on http://localhost:5102?",
-          );
+          setError("Could not load org chart data. Is the API running?");
         }
       })
       .finally(() => {
@@ -74,16 +76,16 @@ function OrgChart() {
   }, []);
 
   const { nodes: allNodes, edges: allEdges } = useMemo(() => {
-    return buildGraph(employees);
-  }, [employees]);
+    return buildGraph(employees, positions);
+  }, [employees, positions]);
 
   const childrenMap = useMemo(() => {
     return buildChildrenMapFromEdges(allEdges);
   }, [allEdges]);
 
   const rootNodeIds = useMemo(() => {
-    return getRootNodeIds(employees);
-  }, [employees]);
+    return getRootNodeIds(employees, positions);
+  }, [employees, positions]);
 
   const initiallyCollapsedNodeIds = useMemo(() => {
     return getNodesToShowAsCollapsed(rootNodeIds, childrenMap);

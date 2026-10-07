@@ -3,10 +3,16 @@ export interface Employee {
   firstName: string;
   lastName: string;
   email: string;
-  department: string;
-  subDepartment: string;
-  jobTitle: string;
-  reportingToUniqueId: string | null;
+  positionUniqueId: string | null;
   seatingPosition: number | null;
   avatarUrl: string | null;
+}
+
+export interface Position {
+  uniqueId: string;
+  jobTitle: string;
+  departmentUniqueId: string;
+  subDepartmentUniqueId: string | null;
+  reportToPositionUniqueId: string | null;
+  seatingPosition: number | null;
 }

@@ -9,6 +9,7 @@ export default function EmployeeNode({ data }: NodeProps) {
   const navigate = useNavigate();
   const nodeData = data as EmployeeNodeData;
   const employee = nodeData.employee;
+  const jobTitle = nodeData.jobTitle;
   const hasChildren = nodeData.hasChildren;
   const isExpanded = nodeData.isExpanded;
   const isSelected = nodeData.isSelected;
@@ -88,7 +89,7 @@ export default function EmployeeNode({ data }: NodeProps) {
                 {fullName}
               </span>
               <span className={`block truncate text-xs ${subtitleClasses}`}>
-                {employee.jobTitle}
+                {jobTitle ?? employee.email}
               </span>
             </span>
           </div>

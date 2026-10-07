@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router";
 import Step1 from "../components/CreateEmployeeForm/Step1";
 import Step2 from "../components/CreateEmployeeForm/Step2";
 import Step3 from "../components/CreateEmployeeForm/Step3";
-import { createEmployee, getManagersSummarised, type CreateEmployeeDto, type ManagerSummary } from "../api/employees";
+import { createEmployee, getPositions, type CreateEmployeeDto, type Position } from "../api/employees";
 
 const TOTAL_STEPS = 3;
 
@@ -11,11 +11,7 @@ const initialFormData: CreateEmployeeDto = {
   firstName: "",
   lastName: "",
   email: "",
-  department: "",
-  subDepartment: "",
-  jobTitle: "",
-  reportingToUniqueId: null,
-  seatingPosition: null,
+  positionUniqueId: null,
   avatarUrl: null,
 };
 
@@ -23,32 +19,32 @@ export default function CreateEmployeePage() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<CreateEmployeeDto>(initialFormData);
-  const [managers, setManagers] = useState<ManagerSummary[]>([]);
-  const [isLoadingManagers, setIsLoadingManagers] = useState(false);
+  const [positions, setPositions] = useState<Position[]>([]);
+  const [isLoadingPositions, setIsLoadingPositions] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadManagers = async () => {
-      setIsLoadingManagers(true);
+    const loadPositions = async () => {
+      setIsLoadingPositions(true);
       try {
-        const managerList = await getManagersSummarised();
-        setManagers(managerList);
+        const positionList = await getPositions();
+        setPositions(positionList);
       } catch {
-        console.error("Failed to load managers");
+        console.error("Failed to load positions");
       } finally {
-        setIsLoadingManagers(false);
+        setIsLoadingPositions(false);
       }
     };
-    loadManagers();
+    loadPositions();
   }, []);
 
   function handleFieldChange(field: keyof CreateEmployeeDto, value: string) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }
 
-  function handleManagerChange(managerId: string | null) {
-    setFormData((prev) => ({ ...prev, reportingToUniqueId: managerId }));
+  function handlePositionChange(positionId: string | null) {
+    setFormData((prev) => ({ ...prev, positionUniqueId: positionId }));
   }
 
   function validateStep(step: number): boolean {
@@ -61,11 +57,7 @@ export default function CreateEmployeePage() {
           formData.email.endsWith("@wbwr.io")
         );
       case 2:
-        return (
-          formData.department.trim() !== "" &&
-          formData.subDepartment.trim() !== "" &&
-          formData.jobTitle.trim() !== ""
-        );
+        return true;
       case 3:
         return true;
       default:
@@ -126,10 +118,9 @@ export default function CreateEmployeePage() {
           {currentStep === 2 && (
             <Step2
               formData={formData}
-              managers={managers}
-              isLoadingManagers={isLoadingManagers}
-              onChange={handleFieldChange}
-              onManagerChange={handleManagerChange}
+              positions={positions}
+              isLoadingPositions={isLoadingPositions}
+              onPositionChange={handlePositionChange}
             />
           )}
           {currentStep === 3 && (

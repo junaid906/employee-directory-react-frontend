@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { getEmployee } from "../api/employees";
 import type { Employee } from "../types/employee";
@@ -10,7 +10,6 @@ import PageCard from "../components/PageCard";
 export default function EmployeeDetailPage() {
   const { id } = useParams();
   const [employee, setEmployee] = useState<Employee | null>(null);
-  const [manager, setManager] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,18 +22,10 @@ export default function EmployeeDetailPage() {
         const data = await getEmployee(id!);
         if (cancelled) return;
         setEmployee(data);
-        if (data.reportingToUniqueId) {
-          try {
-            const m = await getEmployee(data.reportingToUniqueId);
-            if (!cancelled) setManager(m);
-          } catch {
-            if (!cancelled) setManager(null);
-          }
-        }
       } catch {
-        if (!cancelled) setError("Could not load employee.");
+        if (cancelled) setError("Could not load employee.");
       } finally {
-        if (!cancelled) setLoading(false);
+        if (cancelled) setLoading(false);
       }
     }
 
@@ -52,33 +43,15 @@ export default function EmployeeDetailPage() {
     return <ErrorState message={error ?? "Employee not found."} />;
   }
 
-  const reportsTo: ReactNode =
-    manager ? (
-      <Link
-        to={`/employees/${manager.uniqueId}`}
-        className="font-medium text-black hover:underline"
-      >
-        {manager.firstName} {manager.lastName}
-      </Link>
-    ) : employee.reportingToUniqueId ? (
-      employee.reportingToUniqueId
-    ) : (
-      <span className="text-neutral-400">—</span>
-    );
-
-  const fields: Array<[string, ReactNode]> = [
+  const fields: Array<[string, string]> = [
     ["Email", employee.email],
-    ["Department", employee.department],
-    ["Sub-department", employee.subDepartment],
-    ["Job title", employee.jobTitle],
-    ["Reports to", reportsTo],
-    ["Seating position", employee.seatingPosition?.toString() ?? <span className="text-neutral-400">—</span>],
+    ["Seating position", employee.seatingPosition?.toString() ?? "—"],
   ];
 
   return (
     <PageCard
       title={`${employee.firstName} ${employee.lastName}`}
-      subtitle={employee.jobTitle}
+      subtitle="Employee"
       action={
         <Link
           to={`/org-chart?selected=${employee.uniqueId}`}

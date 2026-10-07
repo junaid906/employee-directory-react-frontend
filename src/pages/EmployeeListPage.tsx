@@ -7,7 +7,7 @@ import ErrorState from "../components/ErrorState";
 import LoadingState from "../components/LoadingState";
 import PageCard from "../components/PageCard";
 
-const LOAD_ERROR = "Could not load employees. Is the API running on http://localhost:5102?";
+const LOAD_ERROR = "Could not load employees. Is the API running?";
 
 export default function EmployeeListPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -51,10 +51,6 @@ export default function EmployeeListPage() {
     return <ErrorState message={error} onRetry={load} />;
   }
 
-  const byUniqueId = new Map(
-    employees.map((e) => [e.uniqueId, e]),
-  );
-
   return (
     <PageCard
       title="Employees"
@@ -79,57 +75,33 @@ export default function EmployeeListPage() {
               <tr>
                 <th className="px-6 py-3 font-medium text-neutral-600">Employee</th>
                 <th className="px-6 py-3 font-medium text-neutral-600">Email</th>
-                <th className="px-6 py-3 font-medium text-neutral-600">Department</th>
-                <th className="px-6 py-3 font-medium text-neutral-600">Sub-department</th>
-                <th className="px-6 py-3 font-medium text-neutral-600">Job title</th>
-                <th className="px-6 py-3 font-medium text-neutral-600">Reports to</th>
                 <th className="px-6 py-3 font-medium text-neutral-600">Seat</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
-              {employees.map((e) => {
-                const manager = e.reportingToUniqueId
-                  ? byUniqueId.get(e.reportingToUniqueId)
-                  : undefined;
-                return (
-                  <tr key={e.uniqueId} className="hover:bg-neutral-50">
-                    <td className="px-6 py-4">
-                      <Link
-                        to={`/employees/${e.uniqueId}`}
-                        className="flex items-center gap-3 hover:bg-neutral-100"
-                      >
-                        <Avatar
-                          src={e.avatarUrl}
-                          firstName={e.firstName}
-                          lastName={e.lastName}
-                        />
-                        <span className="font-medium text-black">
-                          {e.firstName} {e.lastName}
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 text-neutral-600">{e.email}</td>
-                    <td className="px-6 py-4 text-neutral-600">{e.department}</td>
-                    <td className="px-6 py-4 text-neutral-600">{e.subDepartment}</td>
-                    <td className="px-6 py-4 text-neutral-600">{e.jobTitle}</td>
-                    <td className="px-6 py-4 text-neutral-600">
-                      {manager ? (
-                        <Link
-                          to={`/employees/${manager.uniqueId}`}
-                          className="font-medium text-black hover:underline"
-                        >
-                          {manager.firstName} {manager.lastName}
-                        </Link>
-                      ) : (
-                        <span className="text-neutral-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-neutral-600">
-                      {e.seatingPosition ?? <span className="text-neutral-400">—</span>}
-                    </td>
-                  </tr>
-                );
-              })}
+              {employees.map((e) => (
+                <tr key={e.uniqueId} className="hover:bg-neutral-50">
+                  <td className="px-6 py-4">
+                    <Link
+                      to={`/employees/${e.uniqueId}`}
+                      className="flex items-center gap-3 hover:bg-neutral-100"
+                    >
+                      <Avatar
+                        src={e.avatarUrl}
+                        firstName={e.firstName}
+                        lastName={e.lastName}
+                      />
+                      <span className="font-medium text-black">
+                        {e.firstName} {e.lastName}
+                      </span>
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 text-neutral-600">{e.email}</td>
+                  <td className="px-6 py-4 text-neutral-600">
+                    {e.seatingPosition ?? <span className="text-neutral-400">—</span>}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

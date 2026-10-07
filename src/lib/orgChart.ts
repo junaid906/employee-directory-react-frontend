@@ -1,12 +1,13 @@
 import dagre from "@dagrejs/dagre";
 import type { Edge, Node } from "@xyflow/react";
-import type { Employee } from "../types/employee";
+import type { Employee, Position } from "../types/employee";
 
 export const NODE_WIDTH = 260;
 export const NODE_HEIGHT = 100;
 
 export type EmployeeNodeData = {
   employee: Employee;
+  jobTitle?: string;
   hasChildren?: boolean;
   isExpanded?: boolean;
   isSelected?: boolean;
@@ -18,24 +19,59 @@ export type EmployeeNodeData = {
 export type ChildrenMap = Map<string, string[]>;
 export type NodeId = string;
 
-export function buildGraph(employees: Employee[]): {
+export function buildGraph(
+  employees: Employee[],
+  positions: Position[],
+): {
   nodes: Node<EmployeeNodeData>[];
   edges: Edge[];
 } {
-  const nodes: Node<EmployeeNodeData>[] = employees.map((employee) => ({
-    id: employee.uniqueId,
-    type: "employee",
-    position: { x: 0, y: 0 },
-    data: { employee },
-  }));
+  const positionById = new Map(positions.map((p) => [p.uniqueId, p]));
 
-  const edges: Edge[] = employees
-    .filter((e) => e.reportingToUniqueId != null)
-    .map((e) => ({
-      id: `e-${e.reportingToUniqueId}-${e.uniqueId}`,
-      source: e.reportingToUniqueId as string,
-      target: e.uniqueId,
-    }));
+  const nodes: Node<EmployeeNodeData>[] = employees.map((employee) => {
+    const position = employee.positionUniqueId
+      ? positionById.get(employee.positionUniqueId)
+      : undefined;
+    return {
+      id: employee.uniqueId,
+      type: "employee",
+      position: { x: 0, y: 0 },
+      data: {
+        employee,
+        jobTitle: position?.jobTitle,
+      },
+    };
+  });
+
+  const employeesByPositionId = new Map<string, Employee[]>();
+
+  for (const employee of employees) {
+    if (employee.positionUniqueId) {
+      const existing = employeesByPositionId.get(employee.positionUniqueId) ?? [];
+      existing.push(employee);
+      employeesByPositionId.set(employee.positionUniqueId, existing);
+    }
+  }
+
+  const edges: Edge[] = [];
+
+  for (const employee of employees) {
+    if (!employee.positionUniqueId) continue;
+
+    const position = positionById.get(employee.positionUniqueId);
+    if (!position || !position.reportToPositionUniqueId) continue;
+
+    const managerEmployees = employeesByPositionId.get(position.reportToPositionUniqueId);
+    if (!managerEmployees) continue;
+
+    for (const managerEmployee of managerEmployees) {
+      edges.push({
+        id: `e-${managerEmployee.uniqueId}-${employee.uniqueId}`,
+        source: managerEmployee.uniqueId,
+        target: employee.uniqueId,
+      });
+    }
+  }
 
   return { nodes, edges };
 }
@@ -128,10 +164,45 @@ export function getHiddenNodeIds(
   return hiddenNodeIds;
 }
 
-export function getRootNodeIds(employees: Employee[]): NodeId[] {
-  return employees
-    .filter((employee) => employee.reportingToUniqueId === null)
-    .map((employee) => employee.uniqueId);
+export function getRootNodeIds(
+  employees: Employee[],
+  positions: Position[],
+): NodeId[] {
+  const positionById = new Map(positions.map((p) => [p.uniqueId, p]));
+  const rootPositionIds = new Set<string>();
+
+  for (const position of positions) {
+    if (!position.reportToPositionUniqueId) {
+      rootPositionIds.add(position.uniqueId);
+    }
+  }
+
+  const employeeRoots: NodeId[] = [];
+  const seenEmployeeIds = new Set<string>();
+
+  for (const employee of employees) {
+    if (seenEmployeeIds.has(employee.uniqueId)) continue;
+
+    if (!employee.positionUniqueId) {
+      employeeRoots.push(employee.uniqueId);
+      seenEmployeeIds.add(employee.uniqueId);
+      continue;
+    }
+
+    const position = positionById.get(employee.positionUniqueId);
+    if (!position) {
+      employeeRoots.push(employee.uniqueId);
+      seenEmployeeIds.add(employee.uniqueId);
+      continue;
+    }
+
+    if (rootPositionIds.has(position.uniqueId)) {
+      employeeRoots.push(employee.uniqueId);
+      seenEmployeeIds.add(employee.uniqueId);
+    }
+  }
+
+  return employeeRoots;
 }
 
 export function getNodesToShowAsCollapsed(
