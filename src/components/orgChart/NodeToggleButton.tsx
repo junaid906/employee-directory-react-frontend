@@ -20,13 +20,13 @@ export default function NodeToggleButton({
     <button
       type="button"
       onClick={handleClick}
-      className={`absolute bottom-[-12px] z-10 flex items-center justify-center rounded-full p-1 cursor-pointer ${className}`}
+      className={`absolute bottom-[-15px] left-1/2 z-10 flex -translate-x-1/2 items-center justify-center rounded-full p-1.5 cursor-pointer transition-colors ${className}`}
       aria-label={isExpanded ? "Collapse" : "Expand"}
     >
       {isExpanded ? (
-        <MdKeyboardArrowUp size={15} />
+        <MdKeyboardArrowUp size={18} />
       ) : (
-        <MdKeyboardArrowDown size={15} />
+        <MdKeyboardArrowDown size={18} />
       )}
     </button>
   );

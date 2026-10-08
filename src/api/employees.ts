@@ -1,8 +1,22 @@
 import { apiClient } from "./client";
-import type { Employee, DetailedEmployee, Position, Department, SubDepartment } from "../types/employee";
+import type {
+  Employee,
+  DetailedEmployee,
+  EmployeeFilters,
+  Position,
+  Department,
+  SubDepartment,
+} from "../types/employee";
 
-export async function listEmployees(): Promise<Employee[]> {
-  const { data } = await apiClient.get<Employee[]>("/employees/");
+export async function listEmployees(
+  filters?: EmployeeFilters,
+): Promise<Employee[]> {
+  const params = Object.fromEntries(
+    Object.entries(filters ?? {}).filter(
+      ([, value]) => value !== undefined && value !== null && value !== "",
+    ),
+  );
+  const { data } = await apiClient.get<Employee[]>("/employees/", { params });
   return data;
 }
 

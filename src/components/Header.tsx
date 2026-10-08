@@ -11,7 +11,10 @@ export function RegularHeader({
   return (
     <header className="border-b border-neutral-300">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-        <Link to={brandLink} className="text-lg font-semibold">
+        <Link
+          to={brandLink}
+          className="text-lg font-semibold transition-opacity hover:opacity-70"
+        >
           WBWR Directory
         </Link>
         <NavLinks />
@@ -28,7 +31,7 @@ export function FloatingHeader() {
           <div className="flex items-center gap-3 sm:gap-4">
             <Link
               to="/employees"
-              className="text-base font-semibold sm:text-lg"
+              className="text-base font-semibold transition-opacity hover:opacity-70 sm:text-lg"
             >
               WBWR Directory
             </Link>

@@ -27,8 +27,8 @@ export default function EmployeeCard({
   children,
 }: EmployeeCardProps) {
   const containerClasses = isSelected
-    ? "bg-black text-white"
-    : "bg-white text-black";
+    ? "bg-black text-white hover:bg-neutral-800"
+    : "bg-white text-black hover:bg-neutral-50";
 
   const avatarBgClasses = isSelected
     ? "bg-neutral-700 text-white"

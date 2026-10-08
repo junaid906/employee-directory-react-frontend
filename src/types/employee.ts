@@ -7,6 +7,14 @@ export interface Employee {
   avatarUrl: string | null;
 }
 
+export interface EmployeeFilters {
+  departmentUniqueId?: string;
+  subDepartmentUniqueId?: string;
+  positionUniqueId?: string;
+  role?: number;
+  search?: string;
+}
+
 export interface DetailedEmployee {
   uniqueId: string;
   firstName: string;

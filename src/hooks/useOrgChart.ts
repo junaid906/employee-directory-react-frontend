@@ -8,6 +8,7 @@ import {
   buildChildrenMapFromEdges,
   buildGraph,
   filterNodesAndEdges,
+  getAncestorIds,
   getAllDescendantIds,
   getDirectChildIds,
   getHiddenNodeIds,
@@ -60,6 +61,9 @@ export function useOrgChart() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(() =>
     searchParams.get("selected"),
   );
+  const [revealedNodeId] = useState<string | null>(() =>
+    searchParams.get("selected"),
+  );
 
   useEffect(() => {
     if (selectedNodeId) {
@@ -69,8 +73,22 @@ export function useOrgChart() {
     }
   }, [selectedNodeId, setSearchParams]);
 
-  const effectiveCollapsedNodeIds =
-    collapsedNodeIds ?? initiallyCollapsedNodeIds;
+  const effectiveCollapsedNodeIds = useMemo(() => {
+    const base = collapsedNodeIds ?? initiallyCollapsedNodeIds;
+
+    if (collapsedNodeIds !== null || !revealedNodeId) return base;
+
+    const revealed = new Set(base);
+    for (const ancestorId of getAncestorIds(revealedNodeId, childToParentMap)) {
+      revealed.delete(ancestorId);
+    }
+    return revealed;
+  }, [
+    collapsedNodeIds,
+    initiallyCollapsedNodeIds,
+    revealedNodeId,
+    childToParentMap,
+  ]);
 
   const hiddenNodeIds = useMemo(
     () => getHiddenNodeIds(effectiveCollapsedNodeIds, childrenMap),

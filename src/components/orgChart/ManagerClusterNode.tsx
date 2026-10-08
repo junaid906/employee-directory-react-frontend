@@ -22,15 +22,17 @@ export default function ManagerClusterNode({ data }: NodeProps) {
   const onSelect = nodeData.onSelect;
 
   const containerClasses = isSelected
-    ? "bg-black text-white"
-    : "bg-white text-black";
+    ? "bg-black text-white hover:bg-neutral-800"
+    : "bg-white text-black hover:bg-neutral-50";
 
-  const borderClasses = isSelected ? "border-white" : "border-neutral-300";
+  const borderClasses = isSelected
+    ? "border-white"
+    : "border-neutral-300 hover:border-neutral-500";
 
   return (
     <div
       style={{ width: getClusterWidth(employees.length) }}
-      className={`relative flex min-h-[180px] flex-col items-center rounded border border-gray-900 p-3 transition-colors duration-300 ${containerClasses} ${borderClasses}`}
+      className={`relative flex min-h-[180px] flex-col items-center rounded border border-gray-900 p-3 pb-6 transition-colors duration-300 ${containerClasses} ${borderClasses}`}
     >
       <Handle
         type="target"

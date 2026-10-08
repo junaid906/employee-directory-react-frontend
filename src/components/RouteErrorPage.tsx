@@ -18,7 +18,7 @@ export default function RouteErrorPage() {
           </p>
           <Link
             to="/"
-            className="mt-4 inline-block bg-black px-4 py-2 text-white"
+            className="mt-4 inline-block bg-black px-4 py-2 text-white transition-colors hover:bg-neutral-800"
           >
             Back to homepage
           </Link>
