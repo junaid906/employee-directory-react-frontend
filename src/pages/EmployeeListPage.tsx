@@ -35,6 +35,8 @@ export default function EmployeeListPage() {
     [positions],
   );
 
+  console.log(employees[0]);
+
   const [deactivateTarget, setDeactivateTarget] = useState<Employee | null>(
     null,
   );
@@ -103,7 +105,7 @@ export default function EmployeeListPage() {
         title="Deactivate employee"
         message={
           deactivateTarget
-            ? `Are you sure you want to deactivate ${deactivateTarget.firstName} ${deactivateTarget.lastName}? This action cannot be undone.`
+            ? `Another one bites the dust! We wish ${deactivateTarget.firstName} ${deactivateTarget.lastName} well!`
             : ""
         }
         confirmLabel="Deactivate"

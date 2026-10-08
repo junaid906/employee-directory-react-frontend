@@ -33,7 +33,7 @@ export default function Avatar({
     return (
       <span
         aria-hidden
-        className={`flex shrink-0 items-center justify-center rounded-full bg-neutral-200 text-neutral-400 ${sizeClasses[size]} ${className}`}
+        className={`flex shrink-0 items-center justify-center rounded-3xl bg-neutral-200 text-neutral-400 ${sizeClasses[size]} ${className}`}
       >
         <FiUser className={iconSizeClasses[size]} />
       </span>
@@ -45,7 +45,7 @@ export default function Avatar({
       <img
         src={src}
         alt={`${firstName} ${lastName}`}
-        className={`rounded-full object-cover ${sizeClasses[size]} ${className}`}
+        className={`rounded-3xl object-cover ${sizeClasses[size]} ${className}`}
       />
     );
   }
@@ -55,7 +55,7 @@ export default function Avatar({
   return (
     <span
       aria-hidden
-      className={`flex shrink-0 items-center justify-center rounded-full bg-neutral-200 font-medium text-neutral-600 ${sizeClasses[size]} ${className}`}
+      className={`flex shrink-0 items-center justify-center rounded-3xl bg-neutral-200 font-medium text-neutral-600 ${sizeClasses[size]} ${className}`}
     >
       {initials}
     </span>

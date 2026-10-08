@@ -30,7 +30,7 @@ export default function ManagerClusterNode({ data }: NodeProps) {
   return (
     <div
       style={{ width: getClusterWidth(employees.length) }}
-      className={`relative flex min-h-[180px] flex-col items-center rounded border-2 p-3 transition-colors duration-300 ${containerClasses} ${borderClasses}`}
+      className={`relative flex min-h-[180px] flex-col items-center rounded border border-gray-900 p-3 transition-colors duration-300 ${containerClasses} ${borderClasses}`}
     >
       <Handle
         type="target"
@@ -39,7 +39,9 @@ export default function ManagerClusterNode({ data }: NodeProps) {
       />
 
       <div className="mb-2 w-full text-center">
-        <span className={`text-sm font-bold ${isSelected ? "text-white" : "text-black"}`}>
+        <span
+          className={`text-sm font-bold ${isSelected ? "text-white" : "text-black"}`}
+        >
           {position.jobTitle}
         </span>
       </div>
