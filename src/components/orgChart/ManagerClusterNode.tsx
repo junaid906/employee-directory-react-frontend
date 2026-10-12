@@ -1,9 +1,7 @@
 import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
-import { useNavigate } from "react-router";
-import { FaExternalLinkSquareAlt } from "react-icons/fa";
 import EmployeeCard from "./EmployeeCard";
-import NodeActionButton from "./NodeActionButton";
+import NodeActions from "./NodeActions";
 import NodeToggleButton from "./NodeToggleButton";
 import {
   getClusterWidth,
@@ -11,7 +9,6 @@ import {
 } from "../../lib/orgChart";
 
 export default function ManagerClusterNode({ data }: NodeProps) {
-  const navigate = useNavigate();
   const nodeData = data as ManagerClusterNodeData;
   const position = nodeData.position;
   const employees = nodeData.employees;
@@ -55,6 +52,12 @@ export default function ManagerClusterNode({ data }: NodeProps) {
         aria-label={`Select ${position.jobTitle}`}
       />
 
+      <NodeActions
+        positionUniqueId={position.uniqueId}
+        actions={["addPosition", "editPosition"]}
+        isSelected={isSelected}
+      />
+
       <div className="flex flex-wrap justify-center gap-1">
         {employees.map((employee) => (
           <EmployeeCard
@@ -66,15 +69,14 @@ export default function ManagerClusterNode({ data }: NodeProps) {
             jobTitle={position.jobTitle}
             isSelected={isSelected}
             onSelect={onSelect}
-            action={
-              <NodeActionButton
-                isSelected={isSelected}
-                label={`View ${employee.firstName} ${employee.lastName}`}
-                icon={<FaExternalLinkSquareAlt className="h-3.5 w-3.5" />}
-                onClick={() => navigate(`/employees/${employee.uniqueId}`)}
-              />
-            }
-          />
+          >
+            <NodeActions
+              positionUniqueId={position.uniqueId}
+              employee={employee}
+              actions={["employee"]}
+              isSelected={isSelected}
+            />
+          </EmployeeCard>
         ))}
       </div>
 

@@ -1,14 +1,11 @@
 import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
-import { useNavigate } from "react-router";
-import { FiPlus } from "react-icons/fi";
 import EmployeeCard from "./EmployeeCard";
-import NodeActionButton from "./NodeActionButton";
+import NodeActions from "./NodeActions";
 import NodeToggleButton from "./NodeToggleButton";
 import type { VacantNodeData } from "../../lib/orgChart";
 
 export default function VacantNode({ data }: NodeProps) {
-  const navigate = useNavigate();
   const nodeData = data as VacantNodeData;
   const position = nodeData.position;
   const hasChildren = nodeData.hasChildren;
@@ -28,17 +25,13 @@ export default function VacantNode({ data }: NodeProps) {
       jobTitle={position.jobTitle}
       isSelected={isSelected}
       onSelect={onSelect}
-      action={
-        <NodeActionButton
-          isSelected={isSelected}
-          label={`Add employee to ${position.jobTitle}`}
-          icon={<FiPlus className="h-4 w-4" />}
-          onClick={() =>
-            navigate(`/employees/create?position=${position.uniqueId}`)
-          }
-        />
-      }
     >
+      <NodeActions
+        positionUniqueId={position.uniqueId}
+        jobTitle={position.jobTitle}
+        isSelected={isSelected}
+      />
+
       <Handle
         type="target"
         position={Position.Top}

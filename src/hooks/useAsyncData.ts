@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { getProblemDetailsMessage } from "../lib/apiError";
 
-interface AsyncResult<T> {
-  requestKey: string;
-  data: T | null;
-  error: string | null;
-}
+type AsyncResult<T> =
+  | { requestKey: string; status: "success"; data: T }
+  | { requestKey: string; status: "error"; error: unknown };
 
 export function useAsyncData<T>(
   key: string,
@@ -27,12 +26,12 @@ export function useAsyncData<T>(
     fetcherRef.current()
       .then((data) => {
         if (!cancelled) {
-          setResult({ requestKey, data, error: null });
+          setResult({ requestKey, status: "success", data });
         }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!cancelled) {
-          setResult({ requestKey, data: null, error: errorMessage });
+          setResult({ requestKey, status: "error", error });
         }
       });
 
@@ -45,12 +44,16 @@ export function useAsyncData<T>(
     setReloadToken((token) => token + 1);
   }
 
-  const isCurrent = result !== null && result.requestKey === requestKey;
+  const current =
+    result?.requestKey === requestKey ? result : null;
 
   return {
-    data: isCurrent ? result.data : null,
-    loading: !isCurrent,
-    error: isCurrent ? result.error : null,
+    data: current?.status === "success" ? current.data : null,
+    loading: current === null,
+    error:
+      current?.status === "error"
+        ? getProblemDetailsMessage(current.error, errorMessage)
+        : null,
     reload,
   };
 }

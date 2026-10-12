@@ -1,15 +1,19 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import Step1 from "../components/CreateEmployeeForm/Step1";
 import Step2 from "../components/CreateEmployeeForm/Step2";
 import Step3 from "../components/CreateEmployeeForm/Step3";
-import StepProgress from "../components/CreateEmployeeForm/StepProgress";
+import StepProgress from "../components/StepProgress";
+import WizardFooter from "../components/WizardFooter";
+import ErrorBanner from "../components/ui/ErrorBanner";
 import {
   createEmployee,
   getPositions,
   type CreateEmployeeDto,
 } from "../api/employees";
 import { useAsyncData } from "../hooks/useAsyncData";
+import { useWizard } from "../hooks/useWizard";
+import { getProblemDetailsMessage } from "../lib/apiError";
 import { COMPANY_EMAIL_DOMAIN } from "../lib/constants";
 import { CREATE_EMPLOYEE_ERROR, POSITIONS_LOAD_ERROR } from "../lib/messages";
 
@@ -27,7 +31,8 @@ const initialFormData: CreateEmployeeDto = {
 export default function CreateEmployeePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [currentStep, setCurrentStep] = useState(1);
+  const { currentStep, isFirst, isLast, next, previous } =
+    useWizard(TOTAL_STEPS);
   const [formData, setFormData] = useState<CreateEmployeeDto>(() => ({
     ...initialFormData,
     positionUniqueId: searchParams.get("position") ?? "",
@@ -76,21 +81,11 @@ export default function CreateEmployeePage() {
     try {
       const employee = await createEmployee(formData);
       navigate(`/employees/${employee.uniqueId}`);
-    } catch {
-      setSubmitError(CREATE_EMPLOYEE_ERROR);
+    } catch (error) {
+      setSubmitError(getProblemDetailsMessage(error, CREATE_EMPLOYEE_ERROR));
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  function goToNextStep() {
-    if (validateStep(currentStep)) {
-      setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
-    }
-  }
-
-  function goToPreviousStep() {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
   }
 
   return (
@@ -99,9 +94,7 @@ export default function CreateEmployeePage() {
         <StepProgress currentStep={currentStep} totalSteps={TOTAL_STEPS} />
 
         {submitError && (
-          <div className="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
-            {submitError}
-          </div>
+          <ErrorBanner className="mb-4">{submitError}</ErrorBanner>
         )}
 
         <div className="min-h-[280px]">
@@ -122,45 +115,18 @@ export default function CreateEmployeePage() {
           )}
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-4">
-          <Link
-            to="/employees"
-            className="rounded border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-black hover:bg-neutral-50"
-          >
-            Cancel
-          </Link>
-
-          <div className="flex gap-2">
-            {currentStep > 1 && (
-              <button
-                type="button"
-                onClick={goToPreviousStep}
-                className="rounded border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-black hover:bg-neutral-50"
-              >
-                Back
-              </button>
-            )}
-            {currentStep < TOTAL_STEPS ? (
-              <button
-                type="button"
-                onClick={goToNextStep}
-                disabled={!validateStep(currentStep)}
-                className="rounded bg-black px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="rounded bg-black px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isSubmitting ? "Creating..." : "Create Employee"}
-              </button>
-            )}
-          </div>
-        </div>
+        <WizardFooter
+          cancelTo="/employees"
+          isFirst={isFirst}
+          isLast={isLast}
+          canProceed={validateStep(currentStep)}
+          submitting={isSubmitting}
+          submitLabel="Create Employee"
+          submittingLabel="Creating..."
+          onPrevious={previous}
+          onNext={next}
+          onSubmit={handleSubmit}
+        />
       </div>
     </div>
   );

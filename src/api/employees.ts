@@ -3,6 +3,8 @@ import type {
   Employee,
   DetailedEmployee,
   EmployeeFilters,
+  InsertPositionDto,
+  UpdatePositionDto,
   Position,
   Department,
   SubDepartment,
@@ -83,6 +85,27 @@ export async function createPosition(
   data: CreatePositionDto,
 ): Promise<Position> {
   const { data: position } = await apiClient.post<Position>("/positions", data);
+  return position;
+}
+
+export async function insertPosition(
+  data: InsertPositionDto,
+): Promise<Position> {
+  const { data: position } = await apiClient.post<Position>(
+    "/positions/insert-between",
+    data,
+  );
+  return position;
+}
+
+export async function updatePosition(
+  uniqueId: string,
+  data: UpdatePositionDto,
+): Promise<Position> {
+  const { data: position } = await apiClient.put<Position>(
+    `/positions/${uniqueId}`,
+    data,
+  );
   return position;
 }
 

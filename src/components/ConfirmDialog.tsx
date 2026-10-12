@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Button from "./ui/Button";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -42,22 +43,12 @@ export default function ConfirmDialog({
           </p>
         )}
         <div className="mt-6 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={isConfirming}
-            className="rounded border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-black hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <Button variant="secondary" onClick={onCancel} disabled={isConfirming}>
             {cancelLabel}
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={isConfirming}
-            className="rounded bg-black px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          </Button>
+          <Button onClick={onConfirm} disabled={isConfirming}>
             {isConfirming ? (confirmingLabel ?? confirmLabel) : confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

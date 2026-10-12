@@ -244,6 +244,20 @@ export function getRootNodeIds(positions: Position[]): NodeId[] {
   return rootPositionIds;
 }
 
+export function buildChildrenMapFromPositions(
+  positions: Position[],
+): ChildrenMap {
+  const childrenMap: ChildrenMap = new Map();
+  for (const position of positions) {
+    const parentId = position.reportToPositionUniqueId;
+    if (!parentId) continue;
+    const existingChildren = childrenMap.get(parentId) ?? [];
+    existingChildren.push(position.uniqueId);
+    childrenMap.set(parentId, existingChildren);
+  }
+  return childrenMap;
+}
+
 export function getAncestorIds(
   nodeId: NodeId,
   childToParentMap: Map<NodeId, NodeId>,

@@ -17,6 +17,9 @@ export default function NavLinks({
       <Link to="/org-chart" className={linkClassName}>
         Org chart
       </Link>
+      <Link to="/positions/create" className={linkClassName}>
+        Add position
+      </Link>
       <Link
         to="/employees/create"
         className="rounded bg-black px-3 py-1.5 font-medium text-white hover:bg-neutral-800"

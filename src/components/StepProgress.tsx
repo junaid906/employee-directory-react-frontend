@@ -1,15 +1,17 @@
 interface StepProgressProps {
   currentStep: number;
   totalSteps: number;
+  title?: string;
 }
 
 export default function StepProgress({
   currentStep,
   totalSteps,
+  title = "Create Employee",
 }: StepProgressProps) {
   return (
     <div className="mb-6">
-      <h1 className="text-xl font-semibold text-black">Create Employee</h1>
+      <h1 className="text-xl font-semibold text-black">{title}</h1>
       <p className="mt-1 text-sm text-neutral-500">
         Step {currentStep} of {totalSteps}
       </p>

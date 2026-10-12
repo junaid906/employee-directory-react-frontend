@@ -2,9 +2,6 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import {
   deactivateEmployee,
-  getDepartments,
-  getPositions,
-  getSubDepartments,
   listEmployees,
 } from "../api/employees";
 import type { Employee, EmployeeFilters } from "../types/employee";
@@ -16,6 +13,10 @@ import LoadingState from "../components/LoadingState";
 import PageCard from "../components/PageCard";
 import { useAsyncData } from "../hooks/useAsyncData";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
+import { useReferenceData } from "../hooks/useReferenceData";
+import { getProblemDetailsMessage } from "../lib/apiError";
+import { buttonClasses } from "../components/ui/buttonClasses";
+import { filterInputClasses } from "../components/ui/formClasses";
 import {
   DEACTIVATE_EMPLOYEE_ERROR,
   EMPLOYEES_LOAD_ERROR,
@@ -42,18 +43,7 @@ export default function EmployeeListPage() {
     return q;
   }, [filters, appliedSearch]);
 
-  const { data: referenceData } = useAsyncData(
-    "employee-list-reference",
-    () =>
-      Promise.all([getPositions(), getDepartments(), getSubDepartments()]).then(
-        ([positions, departments, subDepartments]) => ({
-          positions,
-          departments,
-          subDepartments,
-        }),
-      ),
-    EMPLOYEES_LOAD_ERROR,
-  );
+  const { data: referenceData } = useReferenceData();
 
   const { data: employeeData, loading, error, reload } = useAsyncData(
     `employees:${JSON.stringify(query)}`,
@@ -153,8 +143,10 @@ export default function EmployeeListPage() {
       await deactivateEmployee(deactivateTarget.uniqueId);
       setDeactivateTarget(null);
       reload();
-    } catch {
-      setDeactivateError(DEACTIVATE_EMPLOYEE_ERROR);
+    } catch (error) {
+      setDeactivateError(
+        getProblemDetailsMessage(error, DEACTIVATE_EMPLOYEE_ERROR),
+      );
     } finally {
       setIsDeactivating(false);
     }
@@ -167,7 +159,7 @@ export default function EmployeeListPage() {
       action={
         <Link
           to="/employees/create"
-          className="rounded bg-black px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+          className={buttonClasses("primary")}
         >
           Add Employee
         </Link>
@@ -180,7 +172,7 @@ export default function EmployeeListPage() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search name or email…"
-            className="rounded border border-neutral-300 px-3 py-2 text-sm text-black placeholder:text-neutral-400 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+            className={filterInputClasses}
           />
           {searchInput.trim().length > 0 && searchInput.trim().length < 3 && (
             <span className="text-xs text-neutral-500">
@@ -193,7 +185,7 @@ export default function EmployeeListPage() {
           aria-label="Department"
           value={filters.departmentUniqueId ?? ""}
           onChange={(e) => handleDepartmentChange(e.target.value)}
-          className="rounded border border-neutral-300 px-3 py-2 text-sm text-black focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+          className={filterInputClasses}
         >
           <option value="">All departments</option>
           {departments.map((department) => (
@@ -207,7 +199,7 @@ export default function EmployeeListPage() {
           aria-label="Subdepartment"
           value={filters.subDepartmentUniqueId ?? ""}
           onChange={(e) => handleSubDepartmentChange(e.target.value)}
-          className="rounded border border-neutral-300 px-3 py-2 text-sm text-black focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+          className={filterInputClasses}
         >
           <option value="">All subdepartments</option>
           {visibleSubDepartments.map((subDepartment) => (
@@ -221,7 +213,7 @@ export default function EmployeeListPage() {
           aria-label="Position"
           value={filters.positionUniqueId ?? ""}
           onChange={(e) => handlePositionChange(e.target.value)}
-          className="rounded border border-neutral-300 px-3 py-2 text-sm text-black focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+          className={filterInputClasses}
         >
           <option value="">All positions</option>
           {visiblePositions.map((position) => (

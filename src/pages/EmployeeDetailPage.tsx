@@ -2,10 +2,13 @@ import { Link, useParams } from "react-router";
 import { getEmployee } from "../api/employees";
 import Avatar from "../components/Avatar";
 import ErrorState from "../components/ErrorState";
+import FloorPlan from "../components/FloorPlan";
 import LoadingState from "../components/LoadingState";
 import PageCard from "../components/PageCard";
+import { buttonClasses } from "../components/ui/buttonClasses";
 import { useAsyncData } from "../hooks/useAsyncData";
 import { EMPLOYEE_LOAD_ERROR } from "../lib/messages";
+import { SEATING_MAP } from "../lib/seating";
 
 export default function EmployeeDetailPage() {
   const { id } = useParams();
@@ -29,8 +32,9 @@ export default function EmployeeDetailPage() {
     ["Position", employee.position.jobTitle],
     ["Department", employee.department.departmentName],
     ["Sub Department", employee.subDepartment?.subDepartmentName ?? "—"],
-    ["Seating position", employee.position.seatingPosition.toString()],
   ];
+
+  const seat = SEATING_MAP[employee.position.seatingPosition];
 
   return (
     <PageCard
@@ -39,7 +43,7 @@ export default function EmployeeDetailPage() {
       action={
         <Link
           to={`/org-chart?selected=${employee.position.uniqueId}`}
-          className="rounded border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-black hover:bg-neutral-50"
+          className={buttonClasses("secondary")}
         >
           View in Org Chart
         </Link>
@@ -62,6 +66,12 @@ export default function EmployeeDetailPage() {
             ))}
           </dl>
         </div>
+
+        {seat && (
+          <div className="mt-6">
+            <FloorPlan seat={seat} />
+          </div>
+        )}
       </div>
       <div className="border-t border-neutral-200 px-6 py-4">
         <Link

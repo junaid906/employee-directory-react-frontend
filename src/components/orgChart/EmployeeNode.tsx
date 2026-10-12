@@ -1,14 +1,11 @@
 import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
-import { useNavigate } from "react-router";
-import { FaExternalLinkSquareAlt } from "react-icons/fa";
 import EmployeeCard from "./EmployeeCard";
-import NodeActionButton from "./NodeActionButton";
+import NodeActions from "./NodeActions";
 import NodeToggleButton from "./NodeToggleButton";
 import type { EmployeeNodeData } from "../../lib/orgChart";
 
 export default function EmployeeNode({ data }: NodeProps) {
-  const navigate = useNavigate();
   const nodeData = data as EmployeeNodeData;
   const employee = nodeData.employee;
   const jobTitle = nodeData.jobTitle;
@@ -31,15 +28,14 @@ export default function EmployeeNode({ data }: NodeProps) {
       jobTitle={jobTitle}
       isSelected={isSelected}
       onSelect={onSelect}
-      action={
-        <NodeActionButton
-          isSelected={isSelected}
-          label="View employee"
-          icon={<FaExternalLinkSquareAlt className="h-3.5 w-3.5" />}
-          onClick={() => navigate(`/employees/${employee.uniqueId}`)}
-        />
-      }
     >
+      <NodeActions
+        positionUniqueId={employee.positionUniqueId}
+        employee={employee}
+        jobTitle={jobTitle}
+        isSelected={isSelected}
+      />
+
       <Handle
         type="target"
         position={Position.Top}

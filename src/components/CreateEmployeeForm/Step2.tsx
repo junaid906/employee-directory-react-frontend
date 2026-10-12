@@ -1,5 +1,7 @@
 import type { CreateEmployeeDto } from "../../api/employees";
 import type { Position } from "../../types/employee";
+import Field from "../ui/Field";
+import SelectInput from "../ui/SelectInput";
 
 interface Step2Props {
   formData: CreateEmployeeDto;
@@ -18,20 +20,20 @@ export default function Step2({
 }: Step2Props) {
   return (
     <div className="space-y-4">
-      <div>
-        <label htmlFor="positionUniqueId" className="block text-sm font-medium text-black">
-          Position
-        </label>
+      <Field
+        htmlFor="positionUniqueId"
+        label="Position"
+        hint="Select a position for this employee"
+      >
         {isLoadingPositions ? (
           <p className="mt-1 text-sm text-neutral-500">Loading positions...</p>
         ) : error ? (
           <p className="mt-1 text-sm text-red-600">{error}</p>
         ) : (
-          <select
+          <SelectInput
             id="positionUniqueId"
             value={formData.positionUniqueId}
             onChange={(e) => onPositionChange(e.target.value)}
-            className="mt-1 block w-full rounded border border-neutral-300 px-3 py-2 text-black focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
           >
             <option value="">Select a position</option>
             {positions.map((position) => (
@@ -39,10 +41,9 @@ export default function Step2({
                 {position.jobTitle}
               </option>
             ))}
-          </select>
+          </SelectInput>
         )}
-        <p className="mt-1 text-xs text-neutral-500">Select a position for this employee</p>
-      </div>
+      </Field>
     </div>
   );
 }

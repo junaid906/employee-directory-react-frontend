@@ -35,6 +35,23 @@ export interface Position {
   seatingPosition: number;
 }
 
+export interface InsertPositionDto {
+  jobTitle: string;
+  departmentUniqueId: string;
+  subDepartmentUniqueId: string | null;
+  seatingPosition: number;
+  reportToPositionUniqueId: string | null;
+  childPositionUniqueIds: string[];
+}
+
+export interface UpdatePositionDto {
+  jobTitle: string;
+  departmentUniqueId: string;
+  subDepartmentUniqueId: string | null;
+  reportToPositionUniqueId: string | null;
+  seatingPosition: number;
+}
+
 export interface Department {
   uniqueId: string;
   departmentName: string;
