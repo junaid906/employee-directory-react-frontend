@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import type { Employee, Position } from "../types/employee";
 import Avatar from "./Avatar";
+import { LuMailPlus } from "react-icons/lu";
 
 interface EmployeeTableProps {
   employees: Employee[];
@@ -44,7 +45,15 @@ export default function EmployeeTable({
                     </span>
                   </Link>
                 </td>
-                <td className="px-6 py-4 text-neutral-600">{employee.email}</td>
+                <td className="px-6 py-4 text-neutral-600 ">
+                  <a
+                    href={`mailto:${employee.email}`}
+                    className="inline-flex gap-1.5 hover:text-neutral-400"
+                  >
+                    {employee.email}
+                    <LuMailPlus width={8} height={8} className="my-auto" />
+                  </a>
+                </td>
                 <td className="px-6 py-4 text-neutral-600">
                   {position ? (
                     <span>{position.jobTitle}</span>

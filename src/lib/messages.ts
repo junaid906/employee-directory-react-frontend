@@ -9,6 +9,8 @@ export const CREATE_POSITION_ERROR =
   "Could not create position. Please try again.";
 export const UPDATE_POSITION_ERROR =
   "Could not update position. Please try again.";
+export const REPARENT_POSITION_ERROR =
+  "Could not move position. Please try again.";
 export const CREATE_EMPLOYEE_ERROR =
   "Failed to create employee. Please try again.";
 export const DEACTIVATE_EMPLOYEE_ERROR =

@@ -77,7 +77,7 @@ export default function NodeActions({
       )}
 
       {(actions.includes("editPosition") || actions.includes("employee")) && (
-        <div className="absolute right-0 top-1 z-10 flex flex-col">
+        <div className="absolute right-0 top-1 z-10 flex flex-col gap-px">
           {actions.includes("editPosition") && (
             <ActionButton
               isSelected={isSelected}

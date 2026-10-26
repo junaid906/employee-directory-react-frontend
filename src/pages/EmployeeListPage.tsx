@@ -17,6 +17,7 @@ import { useReferenceData } from "../hooks/useReferenceData";
 import { getProblemDetailsMessage } from "../lib/apiError";
 import { buttonClasses } from "../components/ui/buttonClasses";
 import { filterInputClasses } from "../components/ui/formClasses";
+import SelectInput from "../components/ui/SelectInput";
 import {
   DEACTIVATE_EMPLOYEE_ERROR,
   EMPLOYEES_LOAD_ERROR,
@@ -181,11 +182,11 @@ export default function EmployeeListPage() {
           )}
         </div>
 
-        <select
+        <SelectInput
+          variant="filter"
           aria-label="Department"
           value={filters.departmentUniqueId ?? ""}
           onChange={(e) => handleDepartmentChange(e.target.value)}
-          className={filterInputClasses}
         >
           <option value="">All departments</option>
           {departments.map((department) => (
@@ -193,13 +194,13 @@ export default function EmployeeListPage() {
               {department.departmentName}
             </option>
           ))}
-        </select>
+        </SelectInput>
 
-        <select
+        <SelectInput
+          variant="filter"
           aria-label="Subdepartment"
           value={filters.subDepartmentUniqueId ?? ""}
           onChange={(e) => handleSubDepartmentChange(e.target.value)}
-          className={filterInputClasses}
         >
           <option value="">All subdepartments</option>
           {visibleSubDepartments.map((subDepartment) => (
@@ -207,13 +208,13 @@ export default function EmployeeListPage() {
               {subDepartment.subDepartmentName}
             </option>
           ))}
-        </select>
+        </SelectInput>
 
-        <select
+        <SelectInput
+          variant="filter"
           aria-label="Position"
           value={filters.positionUniqueId ?? ""}
           onChange={(e) => handlePositionChange(e.target.value)}
-          className={filterInputClasses}
         >
           <option value="">All positions</option>
           {visiblePositions.map((position) => (
@@ -221,7 +222,7 @@ export default function EmployeeListPage() {
               {position.jobTitle}
             </option>
           ))}
-        </select>
+        </SelectInput>
 
         {hasFilters && (
           <button

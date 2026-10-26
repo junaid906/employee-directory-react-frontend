@@ -85,7 +85,6 @@ export function usePositionFormState(initial: PositionFormInitial) {
       jobTitle: jobTitle.trim(),
       departmentUniqueId,
       subDepartmentUniqueId: subDepartmentUniqueId || null,
-      reportToPositionUniqueId: reportToPositionUniqueId || null,
       seatingPosition: parseSeatingPosition(),
     };
   }

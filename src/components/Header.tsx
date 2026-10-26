@@ -15,7 +15,7 @@ export function RegularHeader({
           to={brandLink}
           className="text-lg font-semibold transition-opacity hover:opacity-70"
         >
-          WBWR Directory
+          WhereWiser
         </Link>
         <NavLinks />
       </div>
@@ -33,7 +33,7 @@ export function FloatingHeader() {
               to="/employees"
               className="text-base font-semibold transition-opacity hover:opacity-70 sm:text-lg"
             >
-              WBWR Directory
+              WhereWiser
             </Link>
             <NavLinks
               linkClassName="text-neutral-600 underline-offset-2 hover:underline"

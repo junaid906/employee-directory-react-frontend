@@ -1,8 +1,6 @@
 import type { FormEvent } from "react";
-import { useMemo } from "react";
 import type {
   Department,
-  Position,
   SubDepartment,
   UpdatePositionDto,
 } from "../types/employee";
@@ -11,17 +9,14 @@ import {
   type PositionFormInitial,
 } from "../hooks/usePositionFormState";
 import DepartmentFields from "./position/DepartmentFields";
-import ParentSelect from "./position/ParentSelect";
 import SeatingField from "./position/SeatingField";
 import Button from "./ui/Button";
 import ErrorBanner from "./ui/ErrorBanner";
 
 interface PositionFormProps {
   initial: PositionFormInitial;
-  positions: Position[];
   departments: Department[];
   subDepartments: SubDepartment[];
-  excludedParentIds?: Set<string>;
   submitting: boolean;
   error: string | null;
   onSubmit: (values: UpdatePositionDto) => void;
@@ -30,22 +25,14 @@ interface PositionFormProps {
 
 export default function PositionForm({
   initial,
-  positions,
   departments,
   subDepartments,
-  excludedParentIds,
   submitting,
   error,
   onSubmit,
   onCancel,
 }: PositionFormProps) {
   const form = usePositionFormState(initial);
-
-  const parentOptions = useMemo(
-    () =>
-      positions.filter((position) => !excludedParentIds?.has(position.uniqueId)),
-    [positions, excludedParentIds],
-  );
 
   const isValid =
     form.jobTitle.trim() !== "" && form.departmentUniqueId !== "" && !submitting;
@@ -69,12 +56,6 @@ export default function PositionForm({
         onJobTitleChange={form.setJobTitle}
         onDepartmentChange={form.handleDepartmentChange}
         onSubDepartmentChange={form.setSubDepartmentUniqueId}
-      />
-
-      <ParentSelect
-        value={form.reportToPositionUniqueId}
-        options={parentOptions}
-        onChange={form.handleParentChange}
       />
 
       <SeatingField

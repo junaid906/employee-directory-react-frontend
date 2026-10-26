@@ -5,20 +5,26 @@ import type {
   EmployeeFilters,
   InsertPositionDto,
   UpdatePositionDto,
+  ReparentPositionsDto,
   Position,
   Department,
   SubDepartment,
 } from "../types/employee";
 
+function stripEmptyFields(data: object): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(data).filter(
+      ([, value]) => value !== undefined && value !== "",
+    ),
+  );
+}
+
 export async function listEmployees(
   filters?: EmployeeFilters,
 ): Promise<Employee[]> {
-  const params = Object.fromEntries(
-    Object.entries(filters ?? {}).filter(
-      ([, value]) => value !== undefined && value !== null && value !== "",
-    ),
-  );
-  const { data } = await apiClient.get<Employee[]>("/employees/", { params });
+  const { data } = await apiClient.get<Employee[]>("/employees/", {
+    params: stripEmptyFields({ ...filters }),
+  });
   return data;
 }
 
@@ -104,9 +110,15 @@ export async function updatePosition(
 ): Promise<Position> {
   const { data: position } = await apiClient.put<Position>(
     `/positions/${uniqueId}`,
-    data,
+    stripEmptyFields({ ...data }),
   );
   return position;
+}
+
+export async function reparentPositions(
+  data: ReparentPositionsDto,
+): Promise<void> {
+  await apiClient.post("/positions/reparent", stripEmptyFields({ ...data }));
 }
 
 export async function getDepartments(): Promise<Department[]> {

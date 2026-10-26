@@ -48,8 +48,12 @@ export interface UpdatePositionDto {
   jobTitle: string;
   departmentUniqueId: string;
   subDepartmentUniqueId: string | null;
-  reportToPositionUniqueId: string | null;
   seatingPosition: number;
+}
+
+export interface ReparentPositionsDto {
+  reportToPositionUniqueId: string;
+  childPositionUniqueIds: string[];
 }
 
 export interface Department {
