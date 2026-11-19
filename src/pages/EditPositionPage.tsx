@@ -1,18 +1,17 @@
-import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   getPosition,
   reparentPositions,
   updatePosition,
-} from "../api/employees";
-import type { UpdatePositionDto } from "../types/employee";
+} from "../api/positions";
+import type { UpdatePositionDto } from "../types/position";
 import PositionForm from "../components/PositionForm";
 import ReparentForm from "../components/position/ReparentForm";
 import ErrorState from "../components/ErrorState";
 import LoadingState from "../components/LoadingState";
 import { useAsyncData } from "../hooks/useAsyncData";
 import { useReferenceData } from "../hooks/useReferenceData";
-import { getProblemDetailsMessage } from "../lib/apiError";
+import { useSubmit } from "../hooks/useSubmit";
 import {
   POSITIONS_LOAD_ERROR,
   POSITION_LOAD_ERROR,
@@ -51,42 +50,21 @@ export default function EditPositionPage() {
     reloadReference();
   }
 
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [isMoving, setIsMoving] = useState(false);
-  const [moveError, setMoveError] = useState<string | null>(null);
+  const update = useSubmit(async (payload: UpdatePositionDto) => {
+    await updatePosition(positionId, payload);
+    navigate("/org-chart");
+  }, UPDATE_POSITION_ERROR);
 
-  async function handleSubmit(payload: UpdatePositionDto) {
-    setSubmitting(true);
-    setSubmitError(null);
-    try {
-      await updatePosition(positionId, payload);
-      navigate("/org-chart");
-    } catch (error) {
-      setSubmitError(getProblemDetailsMessage(error, UPDATE_POSITION_ERROR));
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  async function handleReparent(
-    targetParentUniqueId: string,
-    childPositionUniqueIds: string[],
-  ) {
-    setIsMoving(true);
-    setMoveError(null);
-    try {
+  const move = useSubmit(
+    async (targetParentUniqueId: string, childPositionUniqueIds: string[]) => {
       await reparentPositions({
         reportToPositionUniqueId: targetParentUniqueId,
         childPositionUniqueIds,
       });
       navigate("/org-chart");
-    } catch (error) {
-      setMoveError(getProblemDetailsMessage(error, REPARENT_POSITION_ERROR));
-    } finally {
-      setIsMoving(false);
-    }
-  }
+    },
+    REPARENT_POSITION_ERROR,
+  );
 
   if (loading) {
     return <LoadingState message="Loading position…" />;
@@ -109,14 +87,12 @@ export default function EditPositionPage() {
             departmentUniqueId: position.departmentUniqueId,
             subDepartmentUniqueId: position.subDepartmentUniqueId ?? "",
             seatingPosition: String(position.seatingPosition),
-            reportToPositionUniqueId: position.reportToPositionUniqueId ?? "",
-            childPositionUniqueIds: [],
           }}
           departments={referenceData.departments}
           subDepartments={referenceData.subDepartments}
-          submitting={submitting}
-          error={submitError}
-          onSubmit={handleSubmit}
+          submitting={update.submitting}
+          error={update.error}
+          onSubmit={update.submit}
           onCancel={() => navigate("/org-chart")}
         />
       </div>
@@ -127,9 +103,9 @@ export default function EditPositionPage() {
           key={`move-${positionId}`}
           positions={referenceData.positions}
           initialMoverIds={[positionId]}
-          submitting={isMoving}
-          error={moveError}
-          onSubmit={handleReparent}
+          submitting={move.submitting}
+          error={move.error}
+          onSubmit={move.submit}
         />
       </div>
     </div>

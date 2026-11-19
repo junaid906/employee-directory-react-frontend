@@ -1,4 +1,5 @@
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
+import Tooltip from "../ui/Tooltip";
 
 interface NodeToggleButtonProps {
   isExpanded?: boolean;
@@ -16,18 +17,22 @@ export default function NodeToggleButton({
     onToggle?.();
   }
 
+  const label = isExpanded ? "Collapse reports" : "Expand reports";
+
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      className={`absolute bottom-[-15px] left-1/2 z-10 flex -translate-x-1/2 items-center justify-center rounded-full p-1.5 cursor-pointer transition-colors ${className}`}
-      aria-label={isExpanded ? "Collapse" : "Expand"}
-    >
-      {isExpanded ? (
-        <MdKeyboardArrowUp size={18} />
-      ) : (
-        <MdKeyboardArrowDown size={18} />
-      )}
-    </button>
+    <Tooltip label={label}>
+      <button
+        type="button"
+        onClick={handleClick}
+        className={`nodrag nopan absolute bottom-[-15px] left-1/2 z-10 flex -translate-x-1/2 items-center justify-center rounded-full p-1.5 cursor-pointer transition-colors ${className}`}
+        aria-label={label}
+      >
+        {isExpanded ? (
+          <MdKeyboardArrowUp size={18} />
+        ) : (
+          <MdKeyboardArrowDown size={18} />
+        )}
+      </button>
+    </Tooltip>
   );
 }

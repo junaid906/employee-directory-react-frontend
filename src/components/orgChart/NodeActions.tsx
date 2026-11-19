@@ -2,10 +2,12 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { FaEdit, FaEye, FaPlus, FaUserPlus } from "react-icons/fa";
 import type { Employee } from "../../types/employee";
+import Tooltip from "../ui/Tooltip";
 
 interface ActionButtonProps {
   icon: ReactNode;
   label: string;
+  tooltip: string;
   onClick: () => void;
   isSelected?: boolean;
   className: string;
@@ -14,6 +16,7 @@ interface ActionButtonProps {
 function ActionButton({
   icon,
   label,
+  tooltip,
   onClick,
   isSelected,
   className,
@@ -24,14 +27,16 @@ function ActionButton({
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      aria-label={label}
-      className={`flex items-center justify-center transition-colors ${className} ${isSelected ? "bg-white text-black hover:bg-neutral-200" : "bg-black text-white hover:bg-neutral-800"}`}
-    >
-      {icon}
-    </button>
+    <Tooltip label={tooltip}>
+      <button
+        type="button"
+        onClick={handleClick}
+        aria-label={label}
+        className={`nodrag nopan flex items-center justify-center transition-colors ${className} ${isSelected ? "bg-white text-black hover:bg-neutral-200" : "bg-black text-white hover:bg-neutral-800"}`}
+      >
+        {icon}
+      </button>
+    </Tooltip>
   );
 }
 
@@ -61,6 +66,9 @@ export default function NodeActions({
   actions = DEFAULT_ACTIONS,
 }: NodeActionsProps) {
   const navigate = useNavigate();
+  const employeeLabel = employee
+    ? `View ${employee.firstName} ${employee.lastName}`
+    : `Add employee to ${jobTitle ?? "position"}`;
 
   return (
     <>
@@ -68,6 +76,7 @@ export default function NodeActions({
         <ActionButton
           isSelected={isSelected}
           label="Add position below"
+          tooltip="Add position below"
           icon={<FaPlus size={15} />}
           onClick={() =>
             navigate(`/positions/create?parent=${positionUniqueId}`)
@@ -82,6 +91,7 @@ export default function NodeActions({
             <ActionButton
               isSelected={isSelected}
               label="Edit position"
+              tooltip="Edit position"
               icon={<FaEdit className="h-4 w-4" />}
               onClick={() => navigate(`/positions/${positionUniqueId}/edit`)}
               className={topRightButtonClasses}
@@ -91,10 +101,9 @@ export default function NodeActions({
           {actions.includes("employee") && (
             <ActionButton
               isSelected={isSelected}
-              label={
-                employee
-                  ? `View ${employee.firstName} ${employee.lastName}`
-                  : `Add employee to ${jobTitle ?? "position"}`
+              label={employeeLabel}
+              tooltip={
+                employee ? `${employeeLabel}'s profile` : employeeLabel
               }
               icon={
                 employee ? (

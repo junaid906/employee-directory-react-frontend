@@ -2,14 +2,14 @@ import { useState } from "react";
 import type {
   InsertPositionDto,
   UpdatePositionDto,
-} from "../types/employee";
+} from "../types/position";
 
 export interface PositionFormInitial {
   jobTitle: string;
   departmentUniqueId: string;
   subDepartmentUniqueId: string;
-  reportToPositionUniqueId: string;
-  childPositionUniqueIds: string[];
+  reportToPositionUniqueId?: string;
+  childPositionUniqueIds?: string[];
   seatingPosition: string;
 }
 
@@ -22,10 +22,10 @@ export function usePositionFormState(initial: PositionFormInitial) {
     initial.subDepartmentUniqueId,
   );
   const [reportToPositionUniqueId, setReportToPositionUniqueId] = useState(
-    initial.reportToPositionUniqueId,
+    initial.reportToPositionUniqueId ?? "",
   );
   const [childPositionUniqueIds, setChildPositionUniqueIds] = useState<string[]>(
-    initial.childPositionUniqueIds,
+    initial.childPositionUniqueIds ?? [],
   );
   const [seatingPosition, setSeatingPosition] = useState(
     initial.seatingPosition,
@@ -54,14 +54,19 @@ export function usePositionFormState(initial: PositionFormInitial) {
     return Number.isFinite(parsed) ? parsed : 0;
   }
 
+  const isDetailsValid = jobTitle.trim() !== "" && departmentUniqueId !== "";
+  const isSeatingValid =
+    seatingPosition.trim() !== "" && Number.isFinite(Number(seatingPosition));
+  const isValid = isDetailsValid && isSeatingValid;
+
   function validateStep(step: number): boolean {
     switch (step) {
       case 1:
-        return jobTitle.trim() !== "" && departmentUniqueId !== "";
+        return isDetailsValid;
       case 2:
         return true;
       case 3:
-        return seatingPosition.trim() !== "" && Number.isFinite(Number(seatingPosition));
+        return isSeatingValid;
       default:
         return false;
     }
@@ -102,6 +107,7 @@ export function usePositionFormState(initial: PositionFormInitial) {
     toggleChild,
     seatingPosition,
     setSeatingPosition,
+    isValid,
     validateStep,
     toInsertDto,
     toUpdateDto,

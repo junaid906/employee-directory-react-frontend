@@ -1,9 +1,6 @@
 import type { FormEvent } from "react";
-import type {
-  Department,
-  SubDepartment,
-  UpdatePositionDto,
-} from "../types/employee";
+import type { Department, SubDepartment } from "../types/department";
+import type { UpdatePositionDto } from "../types/position";
 import {
   usePositionFormState,
   type PositionFormInitial,
@@ -34,12 +31,11 @@ export default function PositionForm({
 }: PositionFormProps) {
   const form = usePositionFormState(initial);
 
-  const isValid =
-    form.jobTitle.trim() !== "" && form.departmentUniqueId !== "" && !submitting;
+  const canSubmit = form.isValid && !submitting;
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!isValid) return;
+    if (!canSubmit) return;
     onSubmit(form.toUpdateDto());
   }
 
@@ -67,7 +63,7 @@ export default function PositionForm({
         <Button variant="secondary" onClick={onCancel} disabled={submitting}>
           Cancel
         </Button>
-        <Button type="submit" disabled={!isValid}>
+        <Button type="submit" disabled={!canSubmit}>
           {submitting ? "Saving…" : "Save changes"}
         </Button>
       </div>

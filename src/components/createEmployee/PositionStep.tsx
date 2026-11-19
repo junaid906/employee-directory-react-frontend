@@ -1,23 +1,23 @@
-import type { CreateEmployeeDto } from "../../api/employees";
-import type { Position } from "../../types/employee";
+import type { EmployeeFormState } from "./formState";
+import type { Position } from "../../types/position";
 import Field from "../ui/Field";
 import SelectInput from "../ui/SelectInput";
 
-interface Step2Props {
-  formData: CreateEmployeeDto;
+interface PositionStepProps {
+  formData: EmployeeFormState;
   positions: Position[];
   isLoadingPositions: boolean;
   error?: string | null;
   onPositionChange: (positionId: string) => void;
 }
 
-export default function Step2({
+export default function PositionStep({
   formData,
   positions,
   isLoadingPositions,
   error,
   onPositionChange,
-}: Step2Props) {
+}: PositionStepProps) {
   return (
     <div className="space-y-4">
       <Field

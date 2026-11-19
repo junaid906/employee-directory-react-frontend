@@ -1,4 +1,6 @@
 import { Link } from "react-router";
+import { buttonClasses } from "../components/ui/buttonClasses";
+import { cx } from "../lib/cx";
 
 export default function NotFoundPage() {
   return (
@@ -8,10 +10,7 @@ export default function NotFoundPage() {
       <p className="mt-2 text-neutral-600">
         The page you are looking for doesn't exist or may have been moved.
       </p>
-      <Link
-        to="/"
-        className="mt-4 inline-block bg-black px-4 py-2 text-white transition-colors hover:bg-neutral-800"
-      >
+      <Link to="/" className={cx(buttonClasses(), "mt-4 inline-block")}>
         Back to homepage
       </Link>
     </div>

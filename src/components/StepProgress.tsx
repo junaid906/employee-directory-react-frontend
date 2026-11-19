@@ -1,13 +1,13 @@
 interface StepProgressProps {
   currentStep: number;
   totalSteps: number;
-  title?: string;
+  title: string;
 }
 
 export default function StepProgress({
   currentStep,
   totalSteps,
-  title = "Create Employee",
+  title,
 }: StepProgressProps) {
   return (
     <div className="mb-6">

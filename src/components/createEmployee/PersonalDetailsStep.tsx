@@ -1,14 +1,17 @@
-import type { CreateEmployeeDto } from "../../api/employees";
+import type { EmployeeFormField, EmployeeFormState } from "./formState";
 import { COMPANY_EMAIL_DOMAIN } from "../../lib/constants";
 import Field from "../ui/Field";
 import TextInput from "../ui/TextInput";
 
-interface Step1Props {
-  formData: CreateEmployeeDto;
-  onChange: (field: keyof CreateEmployeeDto, value: string) => void;
+interface PersonalDetailsStepProps {
+  formData: EmployeeFormState;
+  onChange: (field: EmployeeFormField, value: string) => void;
 }
 
-export default function Step1({ formData, onChange }: Step1Props) {
+export default function PersonalDetailsStep({
+  formData,
+  onChange,
+}: PersonalDetailsStepProps) {
   return (
     <div className="space-y-4">
       <Field htmlFor="firstName" label="First Name" required>
@@ -41,20 +44,11 @@ export default function Step1({ formData, onChange }: Step1Props) {
           value={formData.email}
           onChange={(e) => onChange("email", e.target.value)}
           required
-          pattern={`.+@${COMPANY_EMAIL_DOMAIN.replace(".", "\\.")}`}
-          title={`Email must be from the @${COMPANY_EMAIL_DOMAIN} domain`}
         />
       </Field>
 
       <Field htmlFor="role" label="Role" hint="Assigned automatically">
-        <input
-          type="text"
-          id="role"
-          value="User"
-          readOnly
-          disabled
-          className="mt-1 block w-full rounded border border-neutral-300 bg-neutral-100 px-3 py-2 text-neutral-500"
-        />
+        <TextInput id="role" value="User" readOnly disabled />
       </Field>
     </div>
   );

@@ -1,30 +1,23 @@
+import { BsDiagram3Fill } from "react-icons/bs";
+import { FaList } from "react-icons/fa";
 import { Link } from "react-router";
 
 interface NavLinksProps {
   className?: string;
-  linkClassName?: string;
 }
+
+const iconLinkClasses = "block rounded-sm bg-black p-1 text-white";
 
 export default function NavLinks({
   className = "flex items-center gap-4 text-sm",
-  linkClassName = "text-neutral-600 underline-offset-2 hover:underline",
 }: NavLinksProps) {
   return (
     <nav className={className}>
-      <Link to="/employees" className={linkClassName}>
-        List
+      <Link to="/employees" aria-label="Employees" className={iconLinkClasses}>
+        <FaList />
       </Link>
-      <Link to="/org-chart" className={linkClassName}>
-        Org chart
-      </Link>
-      <Link to="/positions/create" className={linkClassName}>
-        Add position
-      </Link>
-      <Link
-        to="/employees/create"
-        className="rounded bg-black px-3 py-1.5 font-medium text-white hover:bg-neutral-800"
-      >
-        Create Employee
+      <Link to="/org-chart" aria-label="Org chart" className={iconLinkClasses}>
+        <BsDiagram3Fill />
       </Link>
     </nav>
   );

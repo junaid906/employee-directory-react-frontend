@@ -1,13 +1,13 @@
-import type { CreateEmployeeDto } from "../../api/employees";
+import type { EmployeeFormField, EmployeeFormState } from "./formState";
 import Field from "../ui/Field";
 import TextInput from "../ui/TextInput";
 
-interface Step3Props {
-  formData: CreateEmployeeDto;
-  onChange: (field: keyof CreateEmployeeDto, value: string) => void;
+interface AvatarStepProps {
+  formData: EmployeeFormState;
+  onChange: (field: EmployeeFormField, value: string) => void;
 }
 
-export default function Step3({ formData, onChange }: Step3Props) {
+export default function AvatarStep({ formData, onChange }: AvatarStepProps) {
   return (
     <div className="space-y-4">
       <Field
@@ -18,7 +18,7 @@ export default function Step3({ formData, onChange }: Step3Props) {
         <TextInput
           type="url"
           id="avatarUrl"
-          value={formData.avatarUrl ?? ""}
+          value={formData.avatarUrl}
           onChange={(e) => onChange("avatarUrl", e.target.value)}
           placeholder="https://example.com/avatar.jpg"
         />

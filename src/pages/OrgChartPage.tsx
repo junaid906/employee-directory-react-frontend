@@ -1,5 +1,9 @@
 import { useEffect, useRef } from "react";
-import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
+import {
+  ReactFlowProvider,
+  useNodesInitialized,
+  useReactFlow,
+} from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import EmptyState from "../components/EmptyState";
 import ErrorState from "../components/ErrorState";
@@ -15,39 +19,31 @@ function OrgChart() {
     isEmpty,
     nodes,
     edges,
-    visibleNodes,
     selectedNodeId,
     onPaneClick,
     onCollapseAll,
   } = useOrgChart();
 
-  const { fitView, getNode } = useReactFlow();
+  const { fitView } = useReactFlow();
+  const nodesInitialized = useNodesInitialized();
   const hasFittedInitialView = useRef(false);
 
   useEffect(() => {
-    if (hasFittedInitialView.current || selectedNodeId) return;
-    if (visibleNodes.length === 0) return;
+    if (!nodesInitialized) return;
 
+    if (selectedNodeId) {
+      void fitView({
+        nodes: [{ id: selectedNodeId }],
+        padding: 6,
+        duration: 300,
+      });
+      return;
+    }
+
+    if (hasFittedInitialView.current) return;
     hasFittedInitialView.current = true;
-
-    const timer = setTimeout(() => {
-      fitView({ padding: 0.25, duration: 300 });
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [visibleNodes, selectedNodeId, fitView]);
-
-  useEffect(() => {
-    if (!selectedNodeId) return;
-    const node = getNode(selectedNodeId);
-    if (!node) return;
-
-    const timer = setTimeout(() => {
-      fitView({ nodes: [node], padding: 6, duration: 300 });
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [selectedNodeId, visibleNodes, fitView, getNode]);
+    void fitView({ padding: 0.25, duration: 300 });
+  }, [nodesInitialized, selectedNodeId, fitView]);
 
   if (loading) {
     return <LoadingState message="Loading org chart…" />;

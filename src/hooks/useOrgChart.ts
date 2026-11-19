@@ -1,23 +1,29 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
-import { getPositions, listEmployees } from "../api/employees";
+import { listEmployees } from "../api/employees";
+import { getPositions } from "../api/positions";
 import { useAsyncData } from "./useAsyncData";
 import { ORG_CHART_LOAD_ERROR } from "../lib/messages";
+import { buildGraph, filterNodesAndEdges } from "../lib/orgChart/graph";
+import { layoutGraph } from "../lib/orgChart/layout";
 import {
   buildChildToParentMap,
-  buildChildrenMapFromEdges,
-  buildGraph,
-  filterNodesAndEdges,
+  buildChildrenMap,
   getAncestorIds,
-  getAllDescendantIds,
+  getDescendantIds,
   getDirectChildIds,
-  getHiddenNodeIds,
   getNextCollapsedNodeIds,
-  getNodesToShowAsCollapsed,
   getRootNodeIds,
-  layoutGraph,
-  type NodeId,
-} from "../lib/orgChart";
+} from "../lib/orgChart/tree";
+import type {
+  NodeId,
+  NodeUiState,
+  OrgChartNode,
+} from "../lib/orgChart/types";
+
+function withUiState<T extends OrgChartNode>(node: T, ui: NodeUiState): T {
+  return { ...node, data: { ...node.data, ...ui } };
+}
 
 export function useOrgChart() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -38,12 +44,7 @@ export function useOrgChart() {
     [employees, positions],
   );
 
-  const childrenMap = useMemo(
-    () => buildChildrenMapFromEdges(allEdges),
-    [allEdges],
-  );
-
-  const rootNodeIds = useMemo(() => getRootNodeIds(positions), [positions]);
+  const childrenMap = useMemo(() => buildChildrenMap(positions), [positions]);
 
   const childToParentMap = useMemo(
     () => buildChildToParentMap(childrenMap),
@@ -51,27 +52,34 @@ export function useOrgChart() {
   );
 
   const initiallyCollapsedNodeIds = useMemo(
-    () => getNodesToShowAsCollapsed(rootNodeIds, childrenMap),
-    [rootNodeIds, childrenMap],
+    () => getDescendantIds(getRootNodeIds(positions), childrenMap),
+    [positions, childrenMap],
   );
 
   const [collapsedNodeIds, setCollapsedNodeIds] = useState<Set<NodeId> | null>(
     null,
   );
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(() =>
-    searchParams.get("selected"),
-  );
+  const selectedNodeId = searchParams.get("selected");
+
   const [revealedNodeId] = useState<string | null>(() =>
     searchParams.get("selected"),
   );
 
-  useEffect(() => {
-    if (selectedNodeId) {
-      setSearchParams({ selected: selectedNodeId });
-    } else {
-      setSearchParams({});
-    }
-  }, [selectedNodeId, setSearchParams]);
+  const setSelectedNodeId = useCallback(
+    (update: (prev: string | null) => string | null) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          const nodeId = update(prev.get("selected"));
+          if (nodeId) next.set("selected", nodeId);
+          else next.delete("selected");
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
 
   const effectiveCollapsedNodeIds = useMemo(() => {
     const base = collapsedNodeIds ?? initiallyCollapsedNodeIds;
@@ -91,7 +99,7 @@ export function useOrgChart() {
   ]);
 
   const hiddenNodeIds = useMemo(
-    () => getHiddenNodeIds(effectiveCollapsedNodeIds, childrenMap),
+    () => getDescendantIds(effectiveCollapsedNodeIds, childrenMap),
     [effectiveCollapsedNodeIds, childrenMap],
   );
 
@@ -114,57 +122,58 @@ export function useOrgChart() {
     [initiallyCollapsedNodeIds, childToParentMap, childrenMap],
   );
 
-  const handleNodeSelect = useCallback((nodeId: NodeId) => {
-    setSelectedNodeId((prev) => (prev === nodeId ? null : nodeId));
-  }, []);
+  const handleNodeSelect = useCallback(
+    (nodeId: NodeId) => {
+      setSelectedNodeId((prev) => (prev === nodeId ? null : nodeId));
+    },
+    [setSelectedNodeId],
+  );
 
   const handlePaneClick = useCallback(() => {
-    setSelectedNodeId(null);
-  }, []);
+    setSelectedNodeId(() => null);
+  }, [setSelectedNodeId]);
 
   const handleCollapseAll = useCallback(() => {
-    const allDescendants = new Set<NodeId>();
-    for (const node of allNodes) {
-      for (const descendantId of getAllDescendantIds(node.id, childrenMap)) {
-        allDescendants.add(descendantId);
-      }
-    }
-    setCollapsedNodeIds(allDescendants);
+    setCollapsedNodeIds(
+      getDescendantIds(
+        allNodes.map((node) => node.id),
+        childrenMap,
+      ),
+    );
   }, [allNodes, childrenMap]);
 
-  const nodesWithData = useMemo(() => {
-    return visibleNodes.map((node) => ({
-      ...node,
-      data: {
-        ...node.data,
-        hasChildren: getDirectChildIds(node.id, childrenMap).length > 0,
-        isExpanded: !effectiveCollapsedNodeIds.has(node.id),
-        isSelected: node.id === selectedNodeId,
-        onToggle: () => handleToggle(node.id),
-        onSelect: () => handleNodeSelect(node.id),
-      },
-    }));
-  }, [
-    visibleNodes,
-    childrenMap,
-    effectiveCollapsedNodeIds,
-    selectedNodeId,
-    handleToggle,
-    handleNodeSelect,
-  ]);
+  const laidOutNodes = useMemo(
+    () => layoutGraph(visibleNodes, visibleEdges),
+    [visibleNodes, visibleEdges],
+  );
 
-  const nodesAfterLayout = useMemo(
-    () => layoutGraph(nodesWithData, visibleEdges).nodes,
-    [nodesWithData, visibleEdges],
+  const nodes = useMemo(
+    () =>
+      laidOutNodes.map((node) =>
+        withUiState(node, {
+          hasChildren: getDirectChildIds(node.id, childrenMap).length > 0,
+          isExpanded: !effectiveCollapsedNodeIds.has(node.id),
+          isSelected: node.id === selectedNodeId,
+          onToggle: () => handleToggle(node.id),
+          onSelect: () => handleNodeSelect(node.id),
+        }),
+      ),
+    [
+      laidOutNodes,
+      childrenMap,
+      effectiveCollapsedNodeIds,
+      selectedNodeId,
+      handleToggle,
+      handleNodeSelect,
+    ],
   );
 
   return {
     loading,
     error,
     isEmpty: employees.length === 0,
-    nodes: nodesAfterLayout,
+    nodes,
     edges: visibleEdges,
-    visibleNodes,
     selectedNodeId,
     onPaneClick: handlePaneClick,
     onCollapseAll: handleCollapseAll,

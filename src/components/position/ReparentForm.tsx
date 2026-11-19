@@ -1,10 +1,7 @@
 import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import type { Position } from "../../types/employee";
-import {
-  buildChildrenMapFromPositions,
-  getAllDescendantIds,
-} from "../../lib/orgChart";
+import type { Position } from "../../types/position";
+import { buildChildrenMap, getDescendantIds } from "../../lib/orgChart/tree";
 import Field from "../ui/Field";
 import SelectInput from "../ui/SelectInput";
 import Button from "../ui/Button";
@@ -32,21 +29,12 @@ export default function ReparentForm({
   const [moverIds, setMoverIds] = useState<string[]>(initialMoverIds);
   const [targetParentUniqueId, setTargetParentUniqueId] = useState("");
 
-  const childrenMap = useMemo(
-    () => buildChildrenMapFromPositions(positions),
-    [positions],
-  );
+  const childrenMap = useMemo(() => buildChildrenMap(positions), [positions]);
 
-  const invalidParentIds = useMemo(() => {
-    const invalid = new Set<string>();
-    for (const moverId of moverIds) {
-      invalid.add(moverId);
-      for (const descendantId of getAllDescendantIds(moverId, childrenMap)) {
-        invalid.add(descendantId);
-      }
-    }
-    return invalid;
-  }, [moverIds, childrenMap]);
+  const invalidParentIds = useMemo(
+    () => new Set([...moverIds, ...getDescendantIds(moverIds, childrenMap)]),
+    [moverIds, childrenMap],
+  );
 
   const parentOptions = useMemo(
     () =>

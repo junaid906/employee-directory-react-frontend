@@ -1,4 +1,4 @@
-import type { Department, SubDepartment } from "../../types/employee";
+import type { Department, SubDepartment } from "../../types/department";
 import Field from "../ui/Field";
 import SelectInput from "../ui/SelectInput";
 import TextInput from "../ui/TextInput";

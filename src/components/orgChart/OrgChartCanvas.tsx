@@ -6,7 +6,8 @@ import {
 } from "@xyflow/react";
 import type { Edge } from "@xyflow/react";
 import { MdUnfoldLess } from "react-icons/md";
-import type { OrgChartNode } from "../../lib/orgChart";
+import type { OrgChartNode } from "../../lib/orgChart/types";
+import Tooltip from "../ui/Tooltip";
 import EmployeeNode from "./EmployeeNode";
 import ManagerClusterNode from "./ManagerClusterNode";
 import VacantNode from "./VacantNode";
@@ -41,13 +42,11 @@ export default function OrgChartCanvas({
     >
       <Background />
       <Controls>
-        <ControlButton
-          onClick={onCollapseAll}
-          title="Collapse All"
-          aria-label="Collapse All"
-        >
-          <MdUnfoldLess size={16} />
-        </ControlButton>
+        <Tooltip label="Collapse all branches">
+          <ControlButton onClick={onCollapseAll} aria-label="Collapse All">
+            <MdUnfoldLess size={16} />
+          </ControlButton>
+        </Tooltip>
       </Controls>
     </ReactFlow>
   );

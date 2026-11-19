@@ -37,3 +37,11 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+export function stripEmptyFields(data: object): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(data).filter(
+      ([, value]) => value !== undefined && value !== "",
+    ),
+  );
+}

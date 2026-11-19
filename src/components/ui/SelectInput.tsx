@@ -1,5 +1,6 @@
 import type { SelectHTMLAttributes } from "react";
 import { FaChevronDown } from "react-icons/fa";
+import { cx } from "../../lib/cx";
 import { filterSelectClasses, selectClasses } from "./formClasses";
 
 interface SelectInputProps extends SelectHTMLAttributes<HTMLSelectElement> {
@@ -12,12 +13,13 @@ export default function SelectInput({
   children,
   ...props
 }: SelectInputProps) {
-  const classes = variant === "filter" ? filterSelectClasses : selectClasses;
-
   return (
-    <div className={`relative${variant === "default" ? " mt-1" : ""}`}>
+    <div className={cx("relative", variant === "default" && "mt-1")}>
       <select
-        className={`${classes}${className ? ` ${className}` : ""}`}
+        className={cx(
+          variant === "filter" ? filterSelectClasses : selectClasses,
+          className,
+        )}
         {...props}
       >
         {children}

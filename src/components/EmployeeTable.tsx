@@ -1,17 +1,22 @@
 import { Link } from "react-router";
-import type { Employee, Position } from "../types/employee";
+import type { Department } from "../types/department";
+import type { Employee } from "../types/employee";
+import type { Position } from "../types/position";
 import Avatar from "./Avatar";
-import { LuMailPlus } from "react-icons/lu";
+import DepartmentIcon from "./DepartmentIcon";
+import { LuMailPlus, LuUserX } from "react-icons/lu";
 
 interface EmployeeTableProps {
   employees: Employee[];
   positionMap: Record<string, Position>;
+  departmentMap: Record<string, Department>;
   onDeactivate: (employee: Employee) => void;
 }
 
 export default function EmployeeTable({
   employees,
   positionMap,
+  departmentMap,
   onDeactivate,
 }: EmployeeTableProps) {
   return (
@@ -28,6 +33,9 @@ export default function EmployeeTable({
         <tbody className="divide-y divide-neutral-100">
           {employees.map((employee) => {
             const position = positionMap[employee.positionUniqueId];
+            const department = position
+              ? departmentMap[position.departmentUniqueId]
+              : undefined;
             return (
               <tr key={employee.uniqueId} className="hover:bg-neutral-50">
                 <td className="px-6 py-4">
@@ -39,24 +47,33 @@ export default function EmployeeTable({
                       src={employee.avatarUrl}
                       firstName={employee.firstName}
                       lastName={employee.lastName}
+                      size="md"
+                      className="rounded-4xl"
                     />
-                    <span className="font-medium text-black">
+                    <span className="font-medium text-[17px] tracking-wide text-black">
                       {employee.firstName} {employee.lastName}
                     </span>
                   </Link>
                 </td>
-                <td className="px-6 py-4 text-neutral-600 ">
+                <td className="px-6 py-4 text-neutral-600">
                   <a
                     href={`mailto:${employee.email}`}
                     className="inline-flex gap-1.5 hover:text-neutral-400"
                   >
                     {employee.email}
-                    <LuMailPlus width={8} height={8} className="my-auto" />
+                    <LuMailPlus aria-hidden className="my-auto" />
                   </a>
                 </td>
                 <td className="px-6 py-4 text-neutral-600">
                   {position ? (
-                    <span>{position.jobTitle}</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      {position.jobTitle}
+                      {department && (
+                        <DepartmentIcon
+                          departmentName={department.departmentName}
+                        />
+                      )}
+                    </span>
                   ) : (
                     <span className="text-neutral-400">—</span>
                   )}
@@ -65,9 +82,10 @@ export default function EmployeeTable({
                   <button
                     type="button"
                     onClick={() => onDeactivate(employee)}
-                    className="text-sm font-medium text-red-600 hover:text-red-700 hover:underline"
+                    aria-label={`Deactivate ${employee.firstName} ${employee.lastName}`}
+                    className="cursor-pointer rounded-lg bg-red-600 p-2 text-sm font-medium text-white hover:bg-red-500"
                   >
-                    Deactivate
+                    <LuUserX aria-hidden />
                   </button>
                 </td>
               </tr>

@@ -1,4 +1,5 @@
 import { FiUser } from "react-icons/fi";
+import { cx } from "../lib/cx";
 
 interface AvatarProps {
   src?: string | null;
@@ -27,14 +28,17 @@ export default function Avatar({
   lastName = "",
   placeholder = false,
   size = "sm",
-  className = "",
+  className,
 }: AvatarProps) {
+  const baseClasses = cx("rounded-3xl", sizeClasses[size], className);
+  const fallbackClasses = cx(
+    "flex shrink-0 items-center justify-center bg-neutral-200",
+    baseClasses,
+  );
+
   if (placeholder) {
     return (
-      <span
-        aria-hidden
-        className={`flex shrink-0 items-center justify-center rounded-3xl bg-neutral-200 text-neutral-400 ${sizeClasses[size]} ${className}`}
-      >
+      <span aria-hidden className={cx("text-neutral-400", fallbackClasses)}>
         <FiUser className={iconSizeClasses[size]} />
       </span>
     );
@@ -45,19 +49,18 @@ export default function Avatar({
       <img
         src={src}
         alt={`${firstName} ${lastName}`}
-        className={`rounded-3xl object-cover ${sizeClasses[size]} ${className}`}
+        className={cx("object-cover", baseClasses)}
       />
     );
   }
 
-  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
-
   return (
     <span
       aria-hidden
-      className={`flex shrink-0 items-center justify-center rounded-3xl bg-neutral-200 font-medium text-neutral-600 ${sizeClasses[size]} ${className}`}
+      className={cx("font-medium text-neutral-600", fallbackClasses)}
     >
-      {initials}
+      {firstName.charAt(0)}
+      {lastName.charAt(0)}
     </span>
   );
 }

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Button from "./ui/Button";
+import ErrorBanner from "./ui/ErrorBanner";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -37,11 +38,7 @@ export default function ConfirmDialog({
       >
         <h2 className="text-lg font-semibold text-black">{title}</h2>
         <div className="mt-2 text-sm text-neutral-600">{message}</div>
-        {error && (
-          <p className="mt-3 rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">
-            {error}
-          </p>
-        )}
+        {error && <ErrorBanner className="mt-3">{error}</ErrorBanner>}
         <div className="mt-6 flex justify-end gap-2">
           <Button variant="secondary" onClick={onCancel} disabled={isConfirming}>
             {cancelLabel}

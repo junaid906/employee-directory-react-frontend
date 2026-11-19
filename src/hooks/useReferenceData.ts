@@ -1,8 +1,5 @@
-import {
-  getDepartments,
-  getPositions,
-  getSubDepartments,
-} from "../api/employees";
+import { getDepartments, getSubDepartments } from "../api/departments";
+import { getPositions } from "../api/positions";
 import { POSITIONS_LOAD_ERROR } from "../lib/messages";
 import { useAsyncData } from "./useAsyncData";
 

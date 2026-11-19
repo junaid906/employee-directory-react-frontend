@@ -1,4 +1,4 @@
-import type { Position } from "../../types/employee";
+import type { Position } from "../../types/position";
 import { labelClasses } from "../ui/formClasses";
 
 interface ChildPositionPickerProps {

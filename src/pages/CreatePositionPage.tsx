@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { insertPosition } from "../api/employees";
+import { insertPosition } from "../api/positions";
 import ChildPositionPicker from "../components/position/ChildPositionPicker";
 import DepartmentFields from "../components/position/DepartmentFields";
 import ParentSelect from "../components/position/ParentSelect";
@@ -12,8 +11,8 @@ import WizardFooter from "../components/WizardFooter";
 import ErrorBanner from "../components/ui/ErrorBanner";
 import { usePositionFormState } from "../hooks/usePositionFormState";
 import { useReferenceData } from "../hooks/useReferenceData";
+import { useSubmit } from "../hooks/useSubmit";
 import { useWizard } from "../hooks/useWizard";
-import { getProblemDetailsMessage } from "../lib/apiError";
 import {
   CREATE_POSITION_ERROR,
   POSITIONS_LOAD_ERROR,
@@ -42,22 +41,10 @@ export default function CreatePositionPage() {
     childPositionUniqueIds: [],
     seatingPosition: "0",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
-  async function handleSubmit() {
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    try {
-      await insertPosition(form.toInsertDto());
-      navigate("/org-chart");
-    } catch (error) {
-      setSubmitError(getProblemDetailsMessage(error, CREATE_POSITION_ERROR));
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+  const { submit, submitting, error: submitError } = useSubmit(async () => {
+    await insertPosition(form.toInsertDto());
+    navigate("/org-chart");
+  }, CREATE_POSITION_ERROR);
 
   if (loading) {
     return <LoadingState message="Loading positions…" />;
@@ -125,12 +112,12 @@ export default function CreatePositionPage() {
           isFirst={isFirst}
           isLast={isLast}
           canProceed={form.validateStep(currentStep)}
-          submitting={isSubmitting}
+          submitting={submitting}
           submitLabel="Create position"
           submittingLabel="Creating…"
           onPrevious={previous}
           onNext={next}
-          onSubmit={handleSubmit}
+          onSubmit={submit}
         />
       </div>
     </div>

@@ -1,13 +1,16 @@
+import type { ReactNode } from "react";
 import { Outlet } from "react-router";
 import { RegularHeader } from "./Header";
 
-export function Layout() {
+interface LayoutProps {
+  children?: ReactNode;
+}
+
+export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-white text-black">
       <RegularHeader />
-      <main className="mx-auto">
-        <Outlet />
-      </main>
+      <main>{children ?? <Outlet />}</main>
     </div>
   );
 }

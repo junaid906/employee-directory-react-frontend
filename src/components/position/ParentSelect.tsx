@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { Position } from "../../types/employee";
+import type { Position } from "../../types/position";
 import Field from "../ui/Field";
 import SelectInput from "../ui/SelectInput";
 

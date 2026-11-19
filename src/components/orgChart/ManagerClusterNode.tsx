@@ -1,22 +1,14 @@
-import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
+import { getClusterWidth } from "../../lib/orgChart/layout";
+import type { ManagerClusterFlowNode } from "../../lib/orgChart/types";
 import EmployeeCard from "./EmployeeCard";
 import NodeActions from "./NodeActions";
-import NodeToggleButton from "./NodeToggleButton";
-import {
-  getClusterWidth,
-  type ManagerClusterNodeData,
-} from "../../lib/orgChart";
+import NodeHandles from "./NodeHandles";
 
-export default function ManagerClusterNode({ data }: NodeProps) {
-  const nodeData = data as ManagerClusterNodeData;
-  const position = nodeData.position;
-  const employees = nodeData.employees;
-  const hasChildren = nodeData.hasChildren;
-  const isExpanded = nodeData.isExpanded;
-  const isSelected = nodeData.isSelected;
-  const onToggle = nodeData.onToggle;
-  const onSelect = nodeData.onSelect;
+export default function ManagerClusterNode({
+  data,
+}: NodeProps<ManagerClusterFlowNode>) {
+  const { position, employees, isSelected, onSelect } = data;
 
   const containerClasses = isSelected
     ? "bg-black text-white hover:bg-neutral-800"
@@ -31,12 +23,6 @@ export default function ManagerClusterNode({ data }: NodeProps) {
       style={{ width: getClusterWidth(employees.length) }}
       className={`relative flex min-h-[180px] flex-col items-center rounded border border-gray-900 p-3 pb-6 transition-colors duration-300 ${containerClasses} ${borderClasses}`}
     >
-      <Handle
-        type="target"
-        position={Position.Top}
-        className="h-2 w-2 border-neutral-400 bg-white"
-      />
-
       <div className="mb-2 w-full text-center">
         <span
           className={`text-sm font-bold ${isSelected ? "text-white" : "text-black"}`}
@@ -80,23 +66,7 @@ export default function ManagerClusterNode({ data }: NodeProps) {
         ))}
       </div>
 
-      {hasChildren && (
-        <NodeToggleButton
-          isExpanded={isExpanded}
-          onToggle={onToggle}
-          className={
-            isSelected
-              ? "bg-neutral-700 text-white hover:bg-neutral-600"
-              : "bg-black text-white hover:bg-neutral-800"
-          }
-        />
-      )}
-
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        className="h-2 w-2 border-neutral-400 bg-white"
-      />
+      <NodeHandles state={data} variant="cluster" />
     </div>
   );
 }

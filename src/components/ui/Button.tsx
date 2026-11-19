@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes } from "react";
+import { cx } from "../../lib/cx";
 import { buttonClasses, type ButtonVariant } from "./buttonClasses";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -14,7 +15,7 @@ export default function Button({
   return (
     <button
       type={type}
-      className={`${buttonClasses(variant)}${className ? ` ${className}` : ""}`}
+      className={cx(buttonClasses(variant), className)}
       {...props}
     />
   );

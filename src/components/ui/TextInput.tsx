@@ -1,13 +1,22 @@
 import type { InputHTMLAttributes } from "react";
-import { inputClasses } from "./formClasses";
+import { cx } from "../../lib/cx";
+import { filterInputClasses, inputClasses } from "./formClasses";
+
+interface TextInputProps extends InputHTMLAttributes<HTMLInputElement> {
+  variant?: "default" | "filter";
+}
 
 export default function TextInput({
+  variant = "default",
   className,
   ...props
-}: InputHTMLAttributes<HTMLInputElement>) {
+}: TextInputProps) {
   return (
     <input
-      className={`${inputClasses}${className ? ` ${className}` : ""}`}
+      className={cx(
+        variant === "filter" ? filterInputClasses : inputClasses,
+        className,
+      )}
       {...props}
     />
   );
