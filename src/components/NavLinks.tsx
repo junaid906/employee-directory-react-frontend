@@ -6,18 +6,26 @@ interface NavLinksProps {
   className?: string;
 }
 
-const iconLinkClasses = "block rounded-sm bg-black p-1 text-white";
-
 export default function NavLinks({
   className = "flex items-center gap-4 text-sm",
 }: NavLinksProps) {
   return (
     <nav className={className}>
-      <Link to="/employees" aria-label="Employees" className={iconLinkClasses}>
-        <FaList />
+      <Link
+        to="/employees"
+        aria-label="Employees"
+        className="flex gap-1 font-semibold"
+      >
+        <FaList className="my-auto" />
+        <p>List</p>
       </Link>
-      <Link to="/org-chart" aria-label="Org chart" className={iconLinkClasses}>
-        <BsDiagram3Fill />
+      <Link
+        to="/org-chart"
+        aria-label="Org chart"
+        className="flex gap-1 font-semibold"
+      >
+        <BsDiagram3Fill className="my-auto" />
+        <p>Chart</p>
       </Link>
     </nav>
   );

@@ -9,3 +9,5 @@ export const auth = new UserManager({
   scope: import.meta.env.VITE_AUTH_SCOPE,
   userStore: new WebStorageStateStore({ store: window.sessionStorage }),
 });
+
+export const authEnabled = import.meta.env.VITE_AUTH_ENABLED === "true";

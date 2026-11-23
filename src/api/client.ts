@@ -1,5 +1,5 @@
 import axios from "axios";
-import { auth } from "../auth/userManager";
+import { auth, authEnabled } from "../auth/userManager";
 
 const baseURL = (import.meta.env.VITE_API_URL as string | undefined)?.replace(
   /\/$/,
@@ -29,7 +29,11 @@ apiClient.interceptors.request.use(async (config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
+    if (
+      authEnabled &&
+      axios.isAxiosError(error) &&
+      error.response?.status === 401
+    ) {
       await auth.signinRedirect({
         state: { returnTo: window.location.pathname + window.location.search },
       });

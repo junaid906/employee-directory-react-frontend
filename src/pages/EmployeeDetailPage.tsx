@@ -20,11 +20,23 @@ export default function EmployeeDetailPage() {
   } = useAsyncData(id ?? "", () => getEmployee(id!), EMPLOYEE_LOAD_ERROR);
 
   if (loading) {
-    return <LoadingState message="Loading employee…" />;
+    return (
+      <PageCard>
+        <div className="px-4 py-12 sm:px-6">
+          <LoadingState message="Loading employee…" />
+        </div>
+      </PageCard>
+    );
   }
 
   if (error || !employee) {
-    return <ErrorState message={error ?? "Employee not found."} />;
+    return (
+      <PageCard>
+        <div className="px-4 py-12 sm:px-6">
+          <ErrorState message={error ?? "Employee not found."} />
+        </div>
+      </PageCard>
+    );
   }
 
   const fields: Array<[string, string]> = [
@@ -49,19 +61,21 @@ export default function EmployeeDetailPage() {
         </Link>
       }
     >
-      <div className="p-6">
-        <div className="flex items-start gap-6">
+      <div className="p-4 sm:p-6">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
           <Avatar
             src={employee.avatarUrl}
             firstName={employee.firstName}
             lastName={employee.lastName}
             size="lg"
           />
-          <dl className="grid flex-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+          <dl className="grid min-w-0 flex-1 gap-x-8 gap-y-5 sm:grid-cols-2">
             {fields.map(([label, value]) => (
-              <div key={label} className="sm:col-span-1">
-                <dt className="text-sm font-medium text-neutral-500">{label}</dt>
-                <dd className="mt-1 text-sm text-black">{value}</dd>
+              <div key={label} className="min-w-0">
+                <dt className="text-xs font-medium uppercase tracking-wider text-neutral-500">
+                  {label}
+                </dt>
+                <dd className="mt-1 break-words text-base text-black">{value}</dd>
               </div>
             ))}
           </dl>
@@ -73,7 +87,7 @@ export default function EmployeeDetailPage() {
           </div>
         )}
       </div>
-      <div className="border-t border-neutral-200 px-6 py-4">
+      <div className="border-t border-neutral-200 px-4 py-4 sm:px-6">
         <Link
           to="/employees"
           className="text-sm font-medium text-black hover:underline"

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SEATING_MAP } from "../lib/seating";
 import type {
   InsertPositionDto,
   UpdatePositionDto,
@@ -56,7 +57,7 @@ export function usePositionFormState(initial: PositionFormInitial) {
 
   const isDetailsValid = jobTitle.trim() !== "" && departmentUniqueId !== "";
   const isSeatingValid =
-    seatingPosition.trim() !== "" && Number.isFinite(Number(seatingPosition));
+    seatingPosition !== "" && Number(seatingPosition) in SEATING_MAP;
   const isValid = isDetailsValid && isSeatingValid;
 
   function validateStep(step: number): boolean {

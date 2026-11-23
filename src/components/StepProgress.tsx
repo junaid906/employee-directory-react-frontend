@@ -11,7 +11,7 @@ export default function StepProgress({
 }: StepProgressProps) {
   return (
     <div className="mb-6">
-      <h1 className="text-xl font-semibold text-black">{title}</h1>
+      <h1 className="text-lg font-semibold sm:text-xl text-black">{title}</h1>
       <p className="mt-1 text-sm text-neutral-500">
         Step {currentStep} of {totalSteps}
       </p>

@@ -57,9 +57,7 @@ export default function ReparentForm({
   }
 
   const isValid =
-    moverIds.length > 0 &&
-    effectiveTargetParentUniqueId !== "" &&
-    !submitting;
+    moverIds.length > 0 && effectiveTargetParentUniqueId !== "" && !submitting;
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -104,7 +102,7 @@ export default function ReparentForm({
                 type="checkbox"
                 checked={moverIds.includes(position.uniqueId)}
                 onChange={() => toggleMover(position.uniqueId)}
-                className="h-4 w-4 rounded border-neutral-300 text-black focus:ring-black"
+                className="h-4 w-4 border-neutral-300 text-black focus:ring-black appearance-none checked:bg-black outline-1 rounded-full"
               />
               {position.jobTitle}
             </label>

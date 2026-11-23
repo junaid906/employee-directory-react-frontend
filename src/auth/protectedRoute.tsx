@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
-import { auth } from "./userManager";
+import { auth, authEnabled } from "./userManager";
 
 type AuthStatus = "checking" | "signed-in" | "failed";
 
 export function ProtectedRoute() {
-  const [status, setStatus] = useState<AuthStatus>("checking");
+  const [status, setStatus] = useState<AuthStatus>(
+    authEnabled ? "checking" : "signed-in",
+  );
 
   useEffect(() => {
+    if (!authEnabled) return;
     auth
       .getUser()
       .then((user) => {

@@ -7,16 +7,27 @@ interface PageCardProps {
   children: ReactNode;
 }
 
-export default function PageCard({ title, subtitle, action, children }: PageCardProps) {
+export default function PageCard({
+  title,
+  subtitle,
+  action,
+  children,
+}: PageCardProps) {
   return (
-    <div className="rounded border border-neutral-300 bg-white">
+    <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
       {(title || action) && (
-        <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
-          <div>
-            {title && <h1 className="text-xl font-semibold text-black">{title}</h1>}
-            {subtitle && <p className="mt-0.5 text-sm text-neutral-500">{subtitle}</p>}
+        <div className="flex flex-col gap-3 border-b border-neutral-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
+          <div className="min-w-0">
+            {title && (
+              <h1 className="text-lg font-semibold text-black sm:text-xl">
+                {title}
+              </h1>
+            )}
+            {subtitle && (
+              <p className="mt-1 text-sm text-neutral-500">{subtitle}</p>
+            )}
           </div>
-          {action && <div>{action}</div>}
+          {action && <div className="shrink-0">{action}</div>}
         </div>
       )}
       <div>{children}</div>

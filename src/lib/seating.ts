@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import firstFloorSrc from "../assets/1st-floor.svg";
 import loftSrc from "../assets/loft.svg";
 
@@ -38,3 +39,18 @@ export const SEATING_MAP: Record<number, SeatArea> = {
   12: { floor: "loft", x: 1000, y: 480, width: 660, height: 160 },
   13: { floor: "loft", x: 1300, y: 880, width: 330, height: 360 },
 };
+
+export function seatAreaStyle(seat: SeatArea): CSSProperties {
+  const { viewBox } = FLOORS[seat.floor];
+  return {
+    left: `${((seat.x - viewBox.x) / viewBox.width) * 100}%`,
+    top: `${((seat.y - viewBox.y) / viewBox.height) * 100}%`,
+    width: `${(seat.width / viewBox.width) * 100}%`,
+    height: `${(seat.height / viewBox.height) * 100}%`,
+  };
+}
+
+export function seatLabel(value: number): string | null {
+  const seat = SEATING_MAP[value];
+  return seat ? `${FLOORS[seat.floor].label} · Zone ${value}` : null;
+}

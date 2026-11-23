@@ -39,7 +39,7 @@ export default function CreatePositionPage() {
     subDepartmentUniqueId: "",
     reportToPositionUniqueId: searchParams.get("parent") ?? "",
     childPositionUniqueIds: [],
-    seatingPosition: "0",
+    seatingPosition: "",
   });
   const { submit, submitting, error: submitError } = useSubmit(async () => {
     await insertPosition(form.toInsertDto());
@@ -102,7 +102,6 @@ export default function CreatePositionPage() {
             <SeatingField
               value={form.seatingPosition}
               onChange={form.setSeatingPosition}
-              hint="Numeric seating order for this position."
             />
           )}
         </div>

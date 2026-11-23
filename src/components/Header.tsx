@@ -5,9 +5,9 @@ function BrandLink({ to = "/employees" }: { to?: string }) {
   return (
     <Link
       to={to}
-      className="inline-flex gap-1.5 text-base font-semibold transition-opacity hover:opacity-70 sm:text-lg"
+      className="inline-flex items-center gap-1.5 font-display text-sm font-semibold transition-opacity hover:opacity-70 sm:text-base"
     >
-      <img src="/favicon.ico" alt="" className="h-auto w-6 object-contain" />
+      <img src="/favicon.ico" alt="" className="h-auto w-7 object-contain" />
       WhereWiser
     </Link>
   );
@@ -20,7 +20,7 @@ interface RegularHeaderProps {
 export function RegularHeader({ brandLink }: RegularHeaderProps) {
   return (
     <header className="border-b border-neutral-300">
-      <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <BrandLink to={brandLink} />
         <NavLinks />
       </div>

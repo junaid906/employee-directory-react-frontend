@@ -13,6 +13,10 @@ interface EmployeeTableProps {
   onDeactivate: (employee: Employee) => void;
 }
 
+const headCell =
+  "px-4 py-3 text-xs font-medium uppercase tracking-wider text-neutral-500 sm:px-6";
+const bodyCell = "px-4 py-3 sm:px-6 sm:py-4";
+
 export default function EmployeeTable({
   employees,
   positionMap,
@@ -24,10 +28,12 @@ export default function EmployeeTable({
       <table className="w-full text-left text-sm">
         <thead className="border-b border-neutral-200 bg-neutral-50">
           <tr>
-            <th className="px-6 py-3 font-medium text-neutral-600">Employee</th>
-            <th className="px-6 py-3 font-medium text-neutral-600">Email</th>
-            <th className="px-6 py-3 font-medium text-neutral-600">Position</th>
-            <th className="px-6 py-3" />
+            <th className={headCell}>Employee</th>
+            <th className={`${headCell} hidden lg:table-cell`}>Email</th>
+            <th className={`${headCell} hidden sm:table-cell`}>Position</th>
+            <th className={headCell}>
+              <span className="sr-only">Actions</span>
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-100">
@@ -37,34 +43,44 @@ export default function EmployeeTable({
               ? departmentMap[position.departmentUniqueId]
               : undefined;
             return (
-              <tr key={employee.uniqueId} className="hover:bg-neutral-50">
-                <td className="px-6 py-4">
+              <tr
+                key={employee.uniqueId}
+                className="group transition-colors hover:bg-neutral-50"
+              >
+                <td className={bodyCell}>
                   <Link
                     to={`/employees/${employee.uniqueId}`}
-                    className="flex items-center gap-3 hover:bg-neutral-100"
+                    className="flex items-center gap-3 sm:gap-4"
                   >
                     <Avatar
                       src={employee.avatarUrl}
                       firstName={employee.firstName}
                       lastName={employee.lastName}
-                      size="md"
-                      className="rounded-4xl"
+                      size="sm"
+                      className="sm:h-14 sm:w-14 sm:text-base"
                     />
-                    <span className="font-medium text-[17px] tracking-wide text-black">
-                      {employee.firstName} {employee.lastName}
+                    <span className="min-w-0">
+                      <span className="block whitespace-nowrap text-base font-medium text-black group-hover:underline">
+                        {employee.firstName} {employee.lastName}
+                      </span>
+                      {position && (
+                        <span className="block truncate text-sm text-neutral-500 sm:hidden">
+                          {position.jobTitle}
+                        </span>
+                      )}
                     </span>
                   </Link>
                 </td>
-                <td className="px-6 py-4 text-neutral-600">
+                <td className={`${bodyCell} hidden text-neutral-600 lg:table-cell`}>
                   <a
                     href={`mailto:${employee.email}`}
-                    className="inline-flex gap-1.5 hover:text-neutral-400"
+                    className="inline-flex items-center gap-1.5 hover:text-black"
                   >
                     {employee.email}
-                    <LuMailPlus aria-hidden className="my-auto" />
+                    <LuMailPlus aria-hidden />
                   </a>
                 </td>
-                <td className="px-6 py-4 text-neutral-600">
+                <td className={`${bodyCell} hidden text-neutral-600 sm:table-cell`}>
                   {position ? (
                     <span className="inline-flex items-center gap-1.5">
                       {position.jobTitle}
@@ -78,7 +94,7 @@ export default function EmployeeTable({
                     <span className="text-neutral-400">—</span>
                   )}
                 </td>
-                <td className="px-6 py-4 text-right">
+                <td className={`${bodyCell} text-right`}>
                   <button
                     type="button"
                     onClick={() => onDeactivate(employee)}

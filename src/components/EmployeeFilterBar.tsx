@@ -4,6 +4,8 @@ import type { Position } from "../types/position";
 import SelectInput from "./ui/SelectInput";
 import TextInput from "./ui/TextInput";
 
+const filterControlClasses = "w-full lg:w-auto";
+
 interface EmployeeFilterBarProps {
   state: EmployeeFiltersState;
   departments: Department[];
@@ -36,10 +38,11 @@ export default function EmployeeFilterBar({
   );
 
   return (
-    <div className="flex flex-wrap items-center gap-3 border-b border-neutral-200 px-6 py-4">
+    <div className="grid grid-cols-1 gap-3 border-b border-neutral-200 px-4 py-4 sm:grid-cols-2 sm:px-6 lg:flex lg:flex-wrap lg:items-start">
       <div className="flex flex-col gap-1">
         <TextInput
           variant="filter"
+          className={filterControlClasses}
           type="search"
           aria-label="Search"
           value={state.searchInput}
@@ -55,6 +58,7 @@ export default function EmployeeFilterBar({
 
       <SelectInput
         variant="filter"
+        className={filterControlClasses}
         aria-label="Department"
         value={departmentUniqueId ?? ""}
         onChange={(e) => state.setDepartment(e.target.value)}
@@ -69,6 +73,7 @@ export default function EmployeeFilterBar({
 
       <SelectInput
         variant="filter"
+        className={filterControlClasses}
         aria-label="Subdepartment"
         value={subDepartmentUniqueId ?? ""}
         onChange={(e) => state.setSubDepartment(e.target.value)}
@@ -83,6 +88,7 @@ export default function EmployeeFilterBar({
 
       <SelectInput
         variant="filter"
+        className={filterControlClasses}
         aria-label="Position"
         value={positionUniqueId ?? ""}
         onChange={(e) => state.setPosition(e.target.value)}
@@ -99,7 +105,7 @@ export default function EmployeeFilterBar({
         <button
           type="button"
           onClick={state.clear}
-          className="text-sm font-medium text-neutral-600 hover:text-black hover:underline"
+          className="justify-self-start py-2 text-sm font-medium text-neutral-600 hover:text-black hover:underline"
         >
           Clear filters
         </button>

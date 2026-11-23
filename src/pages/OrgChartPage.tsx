@@ -1,9 +1,5 @@
 import { useEffect, useRef } from "react";
-import {
-  ReactFlowProvider,
-  useNodesInitialized,
-  useReactFlow,
-} from "@xyflow/react";
+import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import EmptyState from "../components/EmptyState";
 import ErrorState from "../components/ErrorState";
@@ -24,12 +20,12 @@ function OrgChart() {
     onCollapseAll,
   } = useOrgChart();
 
-  const { fitView } = useReactFlow();
-  const nodesInitialized = useNodesInitialized();
+  const { fitView, viewportInitialized } = useReactFlow();
   const hasFittedInitialView = useRef(false);
+  const visibleNodeCount = nodes.length;
 
   useEffect(() => {
-    if (!nodesInitialized) return;
+    if (!viewportInitialized || visibleNodeCount === 0) return;
 
     if (selectedNodeId) {
       void fitView({
@@ -43,7 +39,7 @@ function OrgChart() {
     if (hasFittedInitialView.current) return;
     hasFittedInitialView.current = true;
     void fitView({ padding: 0.25, duration: 300 });
-  }, [nodesInitialized, selectedNodeId, fitView]);
+  }, [viewportInitialized, visibleNodeCount, selectedNodeId, fitView]);
 
   if (loading) {
     return <LoadingState message="Loading org chart…" />;

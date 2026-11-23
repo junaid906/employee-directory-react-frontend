@@ -68,11 +68,11 @@ export default function EmployeeListPage() {
       />
 
       {loading ? (
-        <div className="px-6 py-12">
+        <div className="px-4 py-12 sm:px-6">
           <LoadingState message="Loading employees…" />
         </div>
       ) : error ? (
-        <div className="px-6 py-12">
+        <div className="px-4 py-12 sm:px-6">
           <ErrorState message={error} onRetry={reload} />
         </div>
       ) : employees.length === 0 ? (
