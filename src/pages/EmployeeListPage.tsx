@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { listEmployees } from "../api/employees";
+import { useCanEdit } from "../auth/permissions";
 import ConfirmDialog from "../components/ConfirmDialog";
 import EmployeeFilterBar from "../components/EmployeeFilterBar";
 import EmployeeTable from "../components/EmployeeTable";
@@ -37,6 +38,7 @@ export default function EmployeeListPage() {
     EMPLOYEES_LOAD_ERROR,
   );
 
+  const canEdit = useCanEdit();
   const deactivate = useDeactivateEmployee(reload);
 
   const positionMap = useMemo(
@@ -55,9 +57,11 @@ export default function EmployeeListPage() {
       title="Employees"
       subtitle={`${employees.length} team member${employees.length !== 1 ? "s" : ""}`}
       action={
-        <Link to="/employees/create" className={buttonClasses("primary")}>
-          Add Employee
-        </Link>
+        canEdit && (
+          <Link to="/employees/create" className={buttonClasses("primary")}>
+            Add Employee
+          </Link>
+        )
       }
     >
       <EmployeeFilterBar
@@ -82,25 +86,27 @@ export default function EmployeeListPage() {
           employees={employees}
           positionMap={positionMap}
           departmentMap={departmentMap}
-          onDeactivate={deactivate.request}
+          onDeactivate={canEdit ? deactivate.request : undefined}
         />
       )}
 
-      <ConfirmDialog
-        open={deactivate.target !== null}
-        title="Deactivate employee"
-        message={
-          deactivate.target
-            ? `Are you sure you want to deactivate ${deactivate.target.firstName} ${deactivate.target.lastName}?`
-            : ""
-        }
-        confirmLabel="Deactivate"
-        confirmingLabel="Deactivating…"
-        isConfirming={deactivate.submitting}
-        error={deactivate.error}
-        onConfirm={deactivate.confirm}
-        onCancel={deactivate.cancel}
-      />
+      {canEdit && (
+        <ConfirmDialog
+          open={deactivate.target !== null}
+          title="Deactivate employee"
+          message={
+            deactivate.target
+              ? `Are you sure you want to deactivate ${deactivate.target.firstName} ${deactivate.target.lastName}?`
+              : ""
+          }
+          confirmLabel="Deactivate"
+          confirmingLabel="Deactivating…"
+          isConfirming={deactivate.submitting}
+          error={deactivate.error}
+          onConfirm={deactivate.confirm}
+          onCancel={deactivate.cancel}
+        />
+      )}
     </PageCard>
   );
 }

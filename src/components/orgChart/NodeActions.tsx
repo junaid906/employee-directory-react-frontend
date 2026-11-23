@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { FaEdit, FaEye, FaPlus, FaUserPlus } from "react-icons/fa";
+import { useCanEdit } from "../../auth/permissions";
 import type { Employee } from "../../types/employee";
 import Tooltip from "../ui/Tooltip";
 
@@ -63,9 +64,14 @@ export default function NodeActions({
   isSelected,
   employee,
   jobTitle,
-  actions = DEFAULT_ACTIONS,
+  actions: requestedActions = DEFAULT_ACTIONS,
 }: NodeActionsProps) {
   const navigate = useNavigate();
+  const canEdit = useCanEdit();
+  const actions = canEdit
+    ? requestedActions
+    : requestedActions.filter((action) => action === "employee" && employee !== undefined,
+      );
   const employeeLabel = employee
     ? `View ${employee.firstName} ${employee.lastName}`
     : `Add employee to ${jobTitle ?? "position"}`;

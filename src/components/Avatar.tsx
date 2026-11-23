@@ -49,6 +49,8 @@ export default function Avatar({
       <img
         src={src}
         alt={`${firstName} ${lastName}`}
+        loading="lazy"
+        decoding="async"
         className={cx("object-cover", baseClasses)}
       />
     );

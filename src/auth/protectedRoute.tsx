@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
+import { PermissionsContext } from "./permissions";
+import { isEditor } from "./roles";
 import { auth, authEnabled } from "./userManager";
 
 type AuthStatus = "checking" | "signed-in" | "failed";
@@ -8,6 +10,7 @@ export function ProtectedRoute() {
   const [status, setStatus] = useState<AuthStatus>(
     authEnabled ? "checking" : "signed-in",
   );
+  const [canEdit, setCanEdit] = useState(authEnabled);
 
   useEffect(() => {
     if (!authEnabled) return;
@@ -15,11 +18,14 @@ export function ProtectedRoute() {
       .getUser()
       .then((user) => {
         if (user && !user.expired) {
+          setCanEdit(isEditor(user));
           setStatus("signed-in");
           return;
         }
         return auth.signinRedirect({
-          state: { returnTo: window.location.pathname + window.location.search },
+          state: {
+            returnTo: window.location.pathname + window.location.search,
+          },
         });
       })
       .catch(() => setStatus("failed"));
@@ -44,5 +50,9 @@ export function ProtectedRoute() {
     return <div className="p-8 text-sm text-neutral-600">Signing in…</div>;
   }
 
-  return <Outlet />;
+  return (
+    <PermissionsContext.Provider value={{ canEdit }}>
+      <Outlet />
+    </PermissionsContext.Provider>
+  );
 }

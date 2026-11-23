@@ -10,7 +10,7 @@ interface EmployeeTableProps {
   employees: Employee[];
   positionMap: Record<string, Position>;
   departmentMap: Record<string, Department>;
-  onDeactivate: (employee: Employee) => void;
+  onDeactivate?: (employee: Employee) => void;
 }
 
 const headCell =
@@ -31,9 +31,11 @@ export default function EmployeeTable({
             <th className={headCell}>Employee</th>
             <th className={`${headCell} hidden lg:table-cell`}>Email</th>
             <th className={`${headCell} hidden sm:table-cell`}>Position</th>
-            <th className={headCell}>
-              <span className="sr-only">Actions</span>
-            </th>
+            {onDeactivate && (
+              <th className={headCell}>
+                <span className="sr-only">Actions</span>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-100">
@@ -94,16 +96,18 @@ export default function EmployeeTable({
                     <span className="text-neutral-400">—</span>
                   )}
                 </td>
-                <td className={`${bodyCell} text-right`}>
-                  <button
-                    type="button"
-                    onClick={() => onDeactivate(employee)}
-                    aria-label={`Deactivate ${employee.firstName} ${employee.lastName}`}
-                    className="cursor-pointer rounded-lg bg-red-600 p-2 text-sm font-medium text-white hover:bg-red-500"
-                  >
-                    <LuUserX aria-hidden />
-                  </button>
-                </td>
+                {onDeactivate && (
+                  <td className={`${bodyCell} text-right`}>
+                    <button
+                      type="button"
+                      onClick={() => onDeactivate(employee)}
+                      aria-label={`Deactivate ${employee.firstName} ${employee.lastName}`}
+                      className="cursor-pointer rounded-lg bg-red-600 p-2 text-sm font-medium text-white hover:bg-red-500"
+                    >
+                      <LuUserX aria-hidden />
+                    </button>
+                  </td>
+                )}
               </tr>
             );
           })}

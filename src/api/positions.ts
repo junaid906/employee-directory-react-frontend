@@ -8,11 +8,13 @@ import type {
 
 export async function getPositions(): Promise<Position[]> {
   const { data } = await apiClient.get<Position[]>("/positions");
+
   return data;
 }
 
 export async function getPosition(id: string): Promise<Position> {
   const { data } = await apiClient.get<Position>(`/positions/${id}`);
+
   return data;
 }
 
@@ -23,6 +25,7 @@ export async function insertPosition(
     "/positions/insert-between",
     data,
   );
+
   return position;
 }
 
@@ -34,6 +37,7 @@ export async function updatePosition(
     `/positions/${uniqueId}`,
     stripEmptyFields({ ...data }),
   );
+
   return position;
 }
 
