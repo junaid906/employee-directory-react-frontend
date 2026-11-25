@@ -5,9 +5,9 @@ import { useCanEdit } from "../auth/permissions";
 import ConfirmDialog from "../components/ConfirmDialog";
 import EmployeeFilterBar from "../components/EmployeeFilterBar";
 import EmployeeTable from "../components/EmployeeTable";
+import EmployeeTableSkeleton from "../components/EmployeeTableSkeleton";
 import EmptyState from "../components/EmptyState";
 import ErrorState from "../components/ErrorState";
-import LoadingState from "../components/LoadingState";
 import PageCard from "../components/PageCard";
 import { buttonClasses } from "../components/ui/buttonClasses";
 import { useAsyncData } from "../hooks/useAsyncData";
@@ -55,7 +55,11 @@ export default function EmployeeListPage() {
   return (
     <PageCard
       title="Employees"
-      subtitle={`${employees.length} team member${employees.length !== 1 ? "s" : ""}`}
+      subtitle={
+        loading
+          ? "Loading…"
+          : `${employees.length} team member${employees.length !== 1 ? "s" : ""}`
+      }
       action={
         canEdit && (
           <Link to="/employees/create" className={buttonClasses("primary")}>
@@ -72,9 +76,7 @@ export default function EmployeeListPage() {
       />
 
       {loading ? (
-        <div className="px-4 py-12 sm:px-6">
-          <LoadingState message="Loading employees…" />
-        </div>
+        <EmployeeTableSkeleton showActions={canEdit} />
       ) : error ? (
         <div className="px-4 py-12 sm:px-6">
           <ErrorState message={error} onRetry={reload} />

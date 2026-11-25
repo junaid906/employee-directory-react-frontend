@@ -37,6 +37,7 @@ apiClient.interceptors.response.use(
       await auth.signinRedirect({
         state: { returnTo: window.location.pathname + window.location.search },
       });
+      return new Promise(() => {});
     }
     return Promise.reject(error);
   },

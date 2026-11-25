@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { auth } from "../../auth/userManager";
+import AuthStatus from "../../components/AuthStatus";
+import { buttonClasses } from "../../components/ui/buttonClasses";
+import { SIGN_IN_FAILED_ERROR } from "../../lib/messages";
 
 export default function CallbackPage() {
   const handled = useRef(false);
@@ -19,16 +22,16 @@ export default function CallbackPage() {
 
   if (failed) {
     return (
-      <div className="p-8 text-sm text-neutral-600">
-        Sign-in failed.{" "}
-        <a href="/" className="font-medium text-black underline">
-          Try again
-        </a>
-      </div>
+      <AuthStatus
+        message={SIGN_IN_FAILED_ERROR}
+        action={
+          <a href="/" className={buttonClasses()}>
+            Try again
+          </a>
+        }
+      />
     );
   }
 
-  return (
-    <div className="p-8 text-sm text-neutral-600">Completing sign-in…</div>
-  );
+  return <AuthStatus message="Completing sign-in…" pending />;
 }

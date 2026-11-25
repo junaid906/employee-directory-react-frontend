@@ -32,12 +32,15 @@ export interface SeatArea {
 }
 
 export const SEATING_MAP: Record<number, SeatArea> = {
-  1: { floor: "floor1", x: 880, y: 230, width: 340, height: 240 },
-  2: { floor: "floor1", x: 1380, y: 500, width: 360, height: 360 },
-  3: { floor: "floor1", x: 1250, y: 1060, width: 380, height: 260 },
-  11: { floor: "loft", x: 200, y: 150, width: 400, height: 300 },
-  12: { floor: "loft", x: 1000, y: 480, width: 660, height: 160 },
-  13: { floor: "loft", x: 1300, y: 880, width: 330, height: 360 },
+  1: { floor: "floor1", x: 95, y: 760, width: 515, height: 545 },
+  2: { floor: "floor1", x: 1235, y: 990, width: 660, height: 305 },
+  3: { floor: "floor1", x: 385, y: 555, width: 170, height: 110 },
+  4: { floor: "floor1", x: 1125, y: 430, width: 795, height: 505 },
+  5: { floor: "floor1", x: 1265, y: 115, width: 655, height: 255 },
+  10: { floor: "loft", x: 1200, y: 790, width: 390, height: 425 },
+  11: { floor: "loft", x: 445, y: 700, width: 165, height: 220 },
+  12: { floor: "loft", x: 218, y: 168, width: 380, height: 390 },
+  13: { floor: "loft", x: 905, y: 170, width: 820, height: 610 },
 };
 
 export function seatAreaStyle(seat: SeatArea): CSSProperties {

@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
+import AuthStatus from "../components/AuthStatus";
+import { buttonClasses } from "../components/ui/buttonClasses";
+import { SIGN_IN_SERVICE_ERROR } from "../lib/messages";
 import { PermissionsContext } from "./permissions";
-import { isEditor } from "./roles";
+import { canWrite } from "./scopes";
 import { auth, authEnabled } from "./userManager";
 
-type AuthStatus = "checking" | "signed-in" | "failed";
+type SignInState = "checking" | "signed-in" | "failed";
 
 export function ProtectedRoute() {
-  const [status, setStatus] = useState<AuthStatus>(
+  const [status, setStatus] = useState<SignInState>(
     authEnabled ? "checking" : "signed-in",
   );
   const [canEdit, setCanEdit] = useState(authEnabled);
@@ -18,7 +21,7 @@ export function ProtectedRoute() {
       .getUser()
       .then((user) => {
         if (user && !user.expired) {
-          setCanEdit(isEditor(user));
+          setCanEdit(canWrite(user));
           setStatus("signed-in");
           return;
         }
@@ -33,21 +36,23 @@ export function ProtectedRoute() {
 
   if (status === "failed") {
     return (
-      <div className="p-8 text-sm text-neutral-600">
-        Could not reach the sign-in service.{" "}
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="font-medium text-black underline"
-        >
-          Try again
-        </button>
-      </div>
+      <AuthStatus
+        message={SIGN_IN_SERVICE_ERROR}
+        action={
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className={buttonClasses()}
+          >
+            Try again
+          </button>
+        }
+      />
     );
   }
 
   if (status === "checking") {
-    return <div className="p-8 text-sm text-neutral-600">Signing in…</div>;
+    return <AuthStatus message="Signing in…" pending />;
   }
 
   return (

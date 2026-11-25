@@ -1,11 +1,15 @@
 import axios from "axios";
+import { API_UNREACHABLE_ERROR, PERMISSION_DENIED_ERROR } from "./messages";
 
 export function getProblemDetailsMessage(
   error: unknown,
   fallback: string,
 ): string {
   if (axios.isAxiosError(error)) {
-    const data = error.response?.data as
+    if (!error.response) return API_UNREACHABLE_ERROR;
+    if (error.response.status === 403) return PERMISSION_DENIED_ERROR;
+
+    const data = error.response.data as
       | { title?: unknown; detail?: unknown }
       | undefined;
 

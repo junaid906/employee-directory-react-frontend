@@ -13,9 +13,9 @@ interface EmployeeTableProps {
   onDeactivate?: (employee: Employee) => void;
 }
 
-const headCell =
+export const headCell =
   "px-4 py-3 text-xs font-medium uppercase tracking-wider text-neutral-500 sm:px-6";
-const bodyCell = "px-4 py-3 sm:px-6 sm:py-4";
+export const bodyCell = "px-4 py-3 sm:px-6 sm:py-4";
 
 export default function EmployeeTable({
   employees,
